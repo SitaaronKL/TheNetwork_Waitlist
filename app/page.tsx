@@ -153,45 +153,21 @@ const MIN_LOCATION_CHARS = 2;
 // Live Counter Component
 function LiveCounter({ realCount }: { realCount: number }) {
   const STORAGE_KEY = 'waitlistDisplayCount';
-  
-  // Initialize with realCount to ensure server/client match (hydration fix)
+
+  // Always render a value that won't cause hydration mismatch
   const [displayCount, setDisplayCount] = useState(realCount);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [introFinished, setIntroFinished] = useState(false);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const driftTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const syncIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const latestRealCountRef = useRef(realCount);
-  const introRafRef = useRef<number | null>(null);
 
-  // Save to localStorage whenever displayCount changes
   const saveToStorage = useCallback((count: number) => {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_KEY, String(count));
-    } catch (e) {
-      // Ignore localStorage errors
+    } catch {
+      // ignore
     }
   }, []);
-
-  // Load from localStorage after hydration (client-side only)
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = parseInt(stored, 10);
-        if (!isNaN(parsed)) {
-          // Use the stored value if it's higher than current displayCount
-          setDisplayCount(prev => Math.max(prev, parsed));
-        }
-      }
-    } catch (e) {
-      // Ignore localStorage errors
-    }
-  }, []); // Run once on mount, not dependent on realCount
 
   const animateChange = useCallback(() => {
     setIsAnimating(true);
@@ -201,169 +177,64 @@ function LiveCounter({ realCount }: { realCount: number }) {
     animationTimeoutRef.current = setTimeout(() => setIsAnimating(false), 300);
   }, []);
 
-  const startSmoothSync = useCallback(() => {
-    if (syncIntervalRef.current) {
-      clearInterval(syncIntervalRef.current);
-      syncIntervalRef.current = null;
-    }
-
-    syncIntervalRef.current = setInterval(() => {
-      setDisplayCount(prev => {
-        const target = latestRealCountRef.current;
-        if (prev === target) {
-          if (syncIntervalRef.current) {
-            clearInterval(syncIntervalRef.current);
-            syncIntervalRef.current = null;
-          }
-          return prev;
-        }
-        const direction = target > prev ? 1 : -1;
-        animateChange();
-        const newCount = prev + direction;
-        // Only save if count increased
-        if (newCount > prev) {
-          saveToStorage(newCount);
-        }
-        return newCount;
-      });
-    }, 600);
-  }, [animateChange, saveToStorage]);
-
-  const scheduleSync = useCallback(() => {
-    if (syncTimeoutRef.current) {
-      clearTimeout(syncTimeoutRef.current);
-      syncTimeoutRef.current = null;
-    }
-    syncTimeoutRef.current = setTimeout(() => {
-      startSmoothSync();
-      scheduleSync();
-    }, 5 * 60 * 1000);
-  }, [startSmoothSync]);
-
+  // Restore from localStorage once on mount (sticky max)
   useEffect(() => {
-    latestRealCountRef.current = realCount;
-    if (!introFinished) return;
-    setDisplayCount(prev => {
-      // Check localStorage for stored value
-      if (typeof window !== 'undefined') {
-        try {
-          const stored = localStorage.getItem(STORAGE_KEY);
-          if (stored) {
-            const parsed = parseInt(stored, 10);
-            if (!isNaN(parsed)) {
-              // Use the maximum of stored, prev, and realCount
-              const maxCount = Math.max(prev, parsed, realCount);
-              if (maxCount > prev) {
-                animateChange();
-                if (maxCount > parsed) {
-                  saveToStorage(maxCount);
-                }
-                return maxCount;
-              }
-            }
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const stored = raw ? parseInt(raw, 10) : NaN;
+      if (!Number.isNaN(stored)) {
+        setDisplayCount(prev => {
+          const next = Math.max(prev, stored, realCount);
+          if (next !== prev) {
+            animateChange();
+            if (next !== stored) saveToStorage(next);
           }
-        } catch (e) {
-          // Ignore localStorage errors
-        }
-      }
-      
-      // If no stored value or realCount is higher, use realCount
-      if (prev === realCount) return prev;
-      animateChange();
-      if (realCount > prev) {
+          return next;
+        });
+      } else {
+        // Initialize storage to at least realCount
         saveToStorage(realCount);
       }
-      return Math.max(prev, realCount);
+    } catch {
+      // ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once
+
+  // When the real server count rises, stick to the max and persist
+  useEffect(() => {
+    setDisplayCount(prev => {
+      const next = Math.max(prev, realCount);
+      if (next !== prev) {
+        animateChange();
+        saveToStorage(next);
+      }
+      return next;
     });
-    scheduleSync();
-  }, [realCount, animateChange, scheduleSync, introFinished, saveToStorage]);
+  }, [realCount, animateChange, saveToStorage]);
 
+  // Gentle drift up over time, persisting after each increment
   useEffect(() => {
-    if (introFinished) return;
-
-    let start: number | null = null;
-    const duration = 1700;
-
-    const animateIntro = (timestamp: number) => {
-      if (start === null) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      const target = latestRealCountRef.current;
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic for satisfying finish
-      setDisplayCount(Math.round(target * eased));
-      if (progress < 1) {
-        introRafRef.current = requestAnimationFrame(animateIntro);
-      } else {
-        setDisplayCount(target);
-        // Save the final intro count
-        saveToStorage(target);
-        setIntroFinished(true);
-      }
-    };
-
-    introRafRef.current = requestAnimationFrame(animateIntro);
-
-    return () => {
-      if (introRafRef.current) {
-        cancelAnimationFrame(introRafRef.current);
-      }
-    };
-  }, [introFinished, saveToStorage]);
-
-  useEffect(() => {
-    if (!introFinished) return;
-
-    const scheduleDrift = () => {
-      const delay = 15000 + Math.random() * 15000;
+    const schedule = () => {
+      const delay = 15000 + Math.random() * 15000; // 15–30s
       driftTimeoutRef.current = setTimeout(() => {
         setDisplayCount(prev => {
           const increment = Math.random() > 0.5 ? 2 : 1;
-          const newCount = prev + increment;
+          const next = prev + increment;
           animateChange();
-          // Save the incremented count to localStorage
-          saveToStorage(newCount);
-          return newCount;
+          saveToStorage(next);
+          return next;
         });
-        scheduleDrift();
+        schedule();
       }, delay);
     };
-
-    scheduleDrift();
-
+    schedule();
     return () => {
-      if (driftTimeoutRef.current) {
-        clearTimeout(driftTimeoutRef.current);
-      }
+      if (driftTimeoutRef.current) clearTimeout(driftTimeoutRef.current);
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
     };
-  }, [animateChange, introFinished, saveToStorage]);
-
-  useEffect(() => {
-    if (!introFinished) return;
-    scheduleSync();
-
-    return () => {
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-        syncTimeoutRef.current = null;
-      }
-    };
-  }, [introFinished, scheduleSync]);
-
-  useEffect(() => {
-    return () => {
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
-      }
-      if (syncIntervalRef.current) {
-        clearInterval(syncIntervalRef.current);
-      }
-      if (driftTimeoutRef.current) {
-        clearTimeout(driftTimeoutRef.current);
-      }
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
-    };
-  }, []);
+  }, [animateChange, saveToStorage]);
 
   return (
     <div className="text-center mb-4">
