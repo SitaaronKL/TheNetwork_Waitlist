@@ -14,7 +14,8 @@ const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
 // Clean up old entries periodically
 setInterval(() => {
   const now = Date.now();
-  for (const [ip, entry] of rateLimitStore.entries()) {
+  const entries = Array.from(rateLimitStore.entries());
+  for (const [ip, entry] of entries) {
     if (entry.resetTime < now) {
       rateLimitStore.delete(ip);
     }
