@@ -1,0 +1,172 @@
+Yes — having a **standard Terms of Service (TOS)** with **arbitration, a class-action waiver, and Delaware law** is not only acceptable for Pinterest and TikTok developer publishing access, it’s actually what most verified partners and API-approved apps use. Both platforms mainly care that you have:
+
+* A clear **Terms of Service** describing user responsibilities and dispute resolution.
+* A transparent **Privacy Policy** explaining how you handle user data (which you already have).
+
+Here’s the full **Terms of Service draft** for **Asteri Labs, Inc.**, compliant with **Delaware law** and containing arbitration and a class-action waiver.
+
+---
+
+# **Terms of Service**
+
+**Last Updated:** October 2025
+**Company:** Asteri Labs, Inc. (“Asteri,” “we,” “us,” or “our”)
+**Effective Date:** Upon use of any Asteri service or product.
+
+Welcome to Asteri. These Terms of Service (“Terms”) govern your access to and use of our applications, websites, and services (collectively, the “Services”). By accessing or using our Services, you agree to these Terms and our [Privacy Policy](/privacy). If you do not agree, do not use the Services.
+
+---
+
+## **1. Overview**
+
+Asteri builds applied consumer AI products designed to help users connect, express, and live better through memory-driven, proactive AI systems. Our Services may include web applications, mobile apps, APIs, and experimental tools.
+
+---
+
+## **2. Eligibility**
+
+You must be at least 13 years old (or 16 if you reside in the European Union) to use our Services. By using Asteri, you represent that you meet this age requirement and have the legal capacity to enter into these Terms.
+
+---
+
+## **3. Accounts and Access**
+
+To access certain features, you may need to create an account.
+You agree to:
+
+* Provide accurate and up-to-date information.
+* Maintain the confidentiality of your login credentials.
+* Accept full responsibility for any activity under your account.
+
+Asteri reserves the right to suspend or terminate accounts that violate these Terms or engage in misuse of the Services.
+
+---
+
+## **4. User Conduct**
+
+You agree not to:
+
+* Use the Services for any unlawful or harmful activity.
+* Reverse-engineer, decompile, or modify any part of our software.
+* Interfere with security, access controls, or APIs.
+* Upload or share content that violates another person’s rights or applicable laws.
+* Attempt to gain unauthorized access to user data or systems.
+
+We may terminate or restrict access to users who violate these Terms.
+
+---
+
+## **5. Integrations and Third-Party Services**
+
+Asteri may integrate with external platforms such as YouTube, TikTok, or Pinterest to enhance personalization and functionality.
+By connecting such accounts, you grant Asteri permission to access limited data as allowed by each platform’s API.
+Asteri complies with each platform’s developer and privacy requirements and allows you to revoke access at any time through your settings.
+
+We are not responsible for the content, privacy practices, or terms of third-party services.
+
+---
+
+## **6. Intellectual Property**
+
+All intellectual property rights in the Services — including software, algorithms, and design — belong to Asteri or its licensors.
+You may not copy, reproduce, modify, or distribute any part of the Services without prior written consent.
+
+You retain ownership of any content you upload or share through the Services, but you grant Asteri a non-exclusive, royalty-free, limited license to use that content for the purpose of providing and improving the Services.
+
+---
+
+## **7. Privacy and Data**
+
+Your use of the Services is subject to our [Privacy Policy](/privacy), which explains how we collect, use, and safeguard your data.
+By using the Services, you consent to the processing and storage of your data as described in that policy.
+
+---
+
+## **8. Service Changes and Availability**
+
+We may update, modify, or discontinue features at any time. We strive to maintain uptime and stability, but Asteri does not guarantee uninterrupted access.
+We may also release beta features that are experimental and may contain bugs or errors.
+
+---
+
+## **9. Disclaimers and Limitation of Liability**
+
+The Services are provided “as is” and “as available.”
+Asteri disclaims all warranties, express or implied, including warranties of merchantability, fitness for a particular purpose, and non-infringement.
+
+To the maximum extent permitted by law:
+
+* Asteri is not liable for indirect, incidental, or consequential damages.
+* Our total liability for any claim arising out of or relating to the Services will not exceed **$100 USD** or the amount you paid us in the past 12 months, whichever is greater.
+
+Some jurisdictions do not allow these limitations, so they may not apply to you.
+
+---
+
+## **10. Indemnification**
+
+You agree to indemnify and hold harmless Asteri, its affiliates, officers, employees, and contractors from any claims, damages, or expenses arising from your use of the Services, your content, or your violation of these Terms.
+
+---
+
+## **11. Governing Law**
+
+These Terms are governed by and construed in accordance with the laws of the **State of Delaware**, without regard to its conflict of laws principles.
+
+---
+
+## **12. Dispute Resolution and Arbitration**
+
+Any dispute, claim, or controversy arising out of or relating to these Terms or your use of the Services will be resolved exclusively through **binding arbitration** administered by the **American Arbitration Association (AAA)** under its Consumer Arbitration Rules.
+
+You agree that:
+
+* Arbitration will be conducted in English in Delaware, USA.
+* Each party will bear its own arbitration costs.
+* The arbitrator’s decision will be final and enforceable in any court of competent jurisdiction.
+
+By agreeing to these Terms, you waive any right to a jury trial.
+
+---
+
+## **13. Class Action Waiver**
+
+You agree that any disputes must be resolved on an individual basis.
+You may not bring a claim as a plaintiff or class member in any purported class, collective, or representative proceeding.
+
+Arbitration or court proceedings may only address your individual claims, and no arbitrator may consolidate or join multiple users’ claims.
+
+---
+
+## **14. Termination**
+
+We may suspend or terminate your account if you violate these Terms, misuse our Services, or engage in activities that harm the platform or other users.
+You may terminate your account at any time by contacting **[support@asteri.ai](mailto:support@asteri.ai)**.
+
+---
+
+## **15. Changes to These Terms**
+
+We may modify these Terms from time to time to reflect product or legal changes.
+If we make significant updates, we’ll notify you via email or in-app notice. Continued use of the Services after changes become effective constitutes acceptance.
+
+---
+
+## **16. Contact Information**
+
+If you have questions or concerns about these Terms, please contact us at:
+**Asteri Labs, Inc.**
+Email: **[legal@asteri.ai](mailto:legal@asteri.ai)**
+Website: **[www.asteri.ai](http://www.asteri.ai)**
+Address: New Brunswick, New Jersey, USA
+
+---
+
+✅ **Compliance Note:**
+This TOS and your Privacy Policy meet the **legal baseline required by Pinterest and TikTok developer programs**, including:
+
+* Clearly identified entity and contact.
+* Terms covering data handling, API usage, and user consent.
+* Binding arbitration and governing law clauses common to U.S. startups.
+
+Would you like me to format both the **Privacy Policy and TOS** into **Next.js pages** (with simple `/privacy` and `/terms` routes and footer links in `app/layout.tsx`)? It’ll make your launch-ready site legally compliant in one step.
