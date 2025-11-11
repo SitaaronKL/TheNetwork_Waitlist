@@ -154,24 +154,8 @@ const MIN_LOCATION_CHARS = 2;
 function LiveCounter({ realCount }: { realCount: number }) {
   const STORAGE_KEY = 'waitlistDisplayCount';
   
-  // Initialize from localStorage if available
-  const getStoredCount = useCallback(() => {
-    if (typeof window === 'undefined') return 0;
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = parseInt(stored, 10);
-        if (!isNaN(parsed) && parsed >= realCount) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      // Ignore localStorage errors
-    }
-    return realCount;
-  }, [realCount]);
-
-  const [displayCount, setDisplayCount] = useState(() => getStoredCount());
+  // Initialize with realCount to ensure server/client match (hydration fix)
+  const [displayCount, setDisplayCount] = useState(realCount);
   const [isAnimating, setIsAnimating] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -190,6 +174,23 @@ function LiveCounter({ realCount }: { realCount: number }) {
       // Ignore localStorage errors
     }
   }, []);
+
+  // Load from localStorage after hydration (client-side only)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = parseInt(stored, 10);
+        if (!isNaN(parsed) && parsed >= realCount) {
+          setDisplayCount(parsed);
+        }
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }, [realCount]);
 
   const animateChange = useCallback(() => {
     setIsAnimating(true);
@@ -270,11 +271,8 @@ function LiveCounter({ realCount }: { realCount: number }) {
         introRafRef.current = requestAnimationFrame(animateIntro);
       } else {
         setDisplayCount(target);
-        // Save the final intro count if it's higher than stored
-        const stored = getStoredCount();
-        if (target > stored) {
-          saveToStorage(target);
-        }
+        // Save the final intro count
+        saveToStorage(target);
         setIntroFinished(true);
       }
     };
@@ -286,7 +284,7 @@ function LiveCounter({ realCount }: { realCount: number }) {
         cancelAnimationFrame(introRafRef.current);
       }
     };
-  }, [introFinished, getStoredCount, saveToStorage]);
+  }, [introFinished, saveToStorage]);
 
   useEffect(() => {
     if (!introFinished) return;
