@@ -183,14 +183,15 @@ function LiveCounter({ realCount }: { realCount: number }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = parseInt(stored, 10);
-        if (!isNaN(parsed) && parsed >= realCount) {
-          setDisplayCount(parsed);
+        if (!isNaN(parsed)) {
+          // Use the stored value if it's higher than current displayCount
+          setDisplayCount(prev => Math.max(prev, parsed));
         }
       }
     } catch (e) {
       // Ignore localStorage errors
     }
-  }, [realCount]);
+  }, []); // Run once on mount, not dependent on realCount
 
   const animateChange = useCallback(() => {
     setIsAnimating(true);
@@ -243,14 +244,36 @@ function LiveCounter({ realCount }: { realCount: number }) {
     latestRealCountRef.current = realCount;
     if (!introFinished) return;
     setDisplayCount(prev => {
+      // Check localStorage for stored value
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const parsed = parseInt(stored, 10);
+            if (!isNaN(parsed)) {
+              // Use the maximum of stored, prev, and realCount
+              const maxCount = Math.max(prev, parsed, realCount);
+              if (maxCount > prev) {
+                animateChange();
+                if (maxCount > parsed) {
+                  saveToStorage(maxCount);
+                }
+                return maxCount;
+              }
+            }
+          }
+        } catch (e) {
+          // Ignore localStorage errors
+        }
+      }
+      
+      // If no stored value or realCount is higher, use realCount
       if (prev === realCount) return prev;
-      // Real count only moves upward, so direct sync is fine.
       animateChange();
-      // Only save if realCount is higher than prev
       if (realCount > prev) {
         saveToStorage(realCount);
       }
-      return realCount;
+      return Math.max(prev, realCount);
     });
     scheduleSync();
   }, [realCount, animateChange, scheduleSync, introFinished, saveToStorage]);
@@ -805,20 +828,31 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const token =
-      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random()}`;
+    
+    // Check if token already exists in localStorage
+    let token = localStorage.getItem('refSessionToken');
+    
+    if (!token) {
+      // Only create new token if one doesn't exist
+      token =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`;
+      localStorage.setItem('refSessionToken', token);
+    }
+    
+    // Initialize refVisits if it doesn't exist
+    if (!localStorage.getItem('refVisits')) {
+      localStorage.setItem('refVisits', '0');
+    }
+    
     setSessionToken(token);
-    localStorage.setItem('refSessionToken', token);
-    localStorage.setItem('refVisits', '0');
 
     return () => {
       if (invitePulseTimeoutRef.current) {
         clearTimeout(invitePulseTimeoutRef.current);
       }
-      localStorage.removeItem('refSessionToken');
-      localStorage.removeItem('refVisits');
+      // Don't remove from localStorage on unmount - we want it to persist
     };
   }, []);
 
