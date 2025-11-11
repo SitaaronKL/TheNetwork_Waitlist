@@ -155,10 +155,12 @@ function LiveCounter({ realCount }: { realCount: number }) {
   const STORAGE_KEY = 'waitlistDisplayCount';
 
   // Always render a value that won't cause hydration mismatch
-  const [displayCount, setDisplayCount] = useState(realCount);
+  const [displayCount, setDisplayCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const driftTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const introRafRef = useRef<number | null>(null);
+  const [introDone, setIntroDone] = useState(false);
 
   const saveToStorage = useCallback((count: number) => {
     if (typeof window === 'undefined') return;
@@ -177,33 +179,59 @@ function LiveCounter({ realCount }: { realCount: number }) {
     animationTimeoutRef.current = setTimeout(() => setIsAnimating(false), 300);
   }, []);
 
-  // Restore from localStorage once on mount (sticky max)
+  // Restore from localStorage once on mount (sticky max) with a light intro count-up from 0
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const stored = raw ? parseInt(raw, 10) : NaN;
-      if (!Number.isNaN(stored)) {
-        setDisplayCount(prev => {
-          const next = Math.max(prev, stored, realCount);
-          if (next !== prev) {
-            animateChange();
-            if (next !== stored) saveToStorage(next);
+      const startValue = 0; // always animate from 0 for perceived legitimacy
+      // Choose target as the stored max if it exists, otherwise use realCount
+      const target = Number.isNaN(stored) ? realCount : Math.max(stored, realCount);
+
+      // If no stored value yet, initialize storage and ensure UI shows at least realCount
+      if (Number.isNaN(stored)) {
+        saveToStorage(target);
+        // fall through to animate from 0 -> target
+      }
+
+      // Animate from startValue → target after hydration to avoid SSR mismatch
+      if (target > startValue) {
+        const duration = 1200;
+        let start: number | null = null;
+        const step = (ts: number) => {
+          if (start === null) start = ts;
+          const progress = Math.min((ts - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+          const next = Math.round(startValue + (target - startValue) * eased);
+          setDisplayCount(next);
+          if (progress < 1) {
+            introRafRef.current = requestAnimationFrame(step);
+          } else {
+            // Persist the final target so refresh keeps the higher value
+            saveToStorage(target);
+            setIntroDone(true);
           }
-          return next;
-        });
+        };
+        introRafRef.current = requestAnimationFrame(step);
       } else {
-        // Initialize storage to at least realCount
-        saveToStorage(realCount);
+        // Nothing to animate; make sure display and storage are aligned
+        setDisplayCount(target);
+        if (target !== stored) saveToStorage(target);
+        setIntroDone(true);
       }
     } catch {
       // ignore
     }
+    return () => {
+      if (introRafRef.current) cancelAnimationFrame(introRafRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // run once
 
   // When the real server count rises, stick to the max and persist
   useEffect(() => {
+    if (!introDone) return; // wait until intro finishes
     setDisplayCount(prev => {
       const next = Math.max(prev, realCount);
       if (next !== prev) {
@@ -212,7 +240,7 @@ function LiveCounter({ realCount }: { realCount: number }) {
       }
       return next;
     });
-  }, [realCount, animateChange, saveToStorage]);
+  }, [realCount, introDone, animateChange, saveToStorage]);
 
   // Gentle drift up over time, persisting after each increment
   useEffect(() => {
