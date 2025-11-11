@@ -73,7 +73,7 @@ export default function MemoPage() {
                     className="w-full h-auto rounded"
                   />
                 </div>
-                <p className="text-gray-400 text-sm mt-2">Content -> Interests -> People -> Community</p>
+                <p className="text-gray-400 text-sm mt-2">Content &gt; Interests &gt; People &gt; Community</p>
               </div>
             </div>
           </section>
