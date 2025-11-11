@@ -152,7 +152,26 @@ const MIN_LOCATION_CHARS = 2;
 
 // Live Counter Component
 function LiveCounter({ realCount }: { realCount: number }) {
-  const [displayCount, setDisplayCount] = useState(0);
+  const STORAGE_KEY = 'waitlistDisplayCount';
+  
+  // Initialize from localStorage if available
+  const getStoredCount = useCallback(() => {
+    if (typeof window === 'undefined') return 0;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = parseInt(stored, 10);
+        if (!isNaN(parsed) && parsed >= realCount) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+    return realCount;
+  }, [realCount]);
+
+  const [displayCount, setDisplayCount] = useState(() => getStoredCount());
   const [isAnimating, setIsAnimating] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -161,6 +180,16 @@ function LiveCounter({ realCount }: { realCount: number }) {
   const syncIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const latestRealCountRef = useRef(realCount);
   const introRafRef = useRef<number | null>(null);
+
+  // Save to localStorage whenever displayCount changes
+  const saveToStorage = useCallback((count: number) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(STORAGE_KEY, String(count));
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }, []);
 
   const animateChange = useCallback(() => {
     setIsAnimating(true);
@@ -188,10 +217,15 @@ function LiveCounter({ realCount }: { realCount: number }) {
         }
         const direction = target > prev ? 1 : -1;
         animateChange();
-        return prev + direction;
+        const newCount = prev + direction;
+        // Only save if count increased
+        if (newCount > prev) {
+          saveToStorage(newCount);
+        }
+        return newCount;
       });
     }, 600);
-  }, [animateChange]);
+  }, [animateChange, saveToStorage]);
 
   const scheduleSync = useCallback(() => {
     if (syncTimeoutRef.current) {
@@ -211,10 +245,14 @@ function LiveCounter({ realCount }: { realCount: number }) {
       if (prev === realCount) return prev;
       // Real count only moves upward, so direct sync is fine.
       animateChange();
+      // Only save if realCount is higher than prev
+      if (realCount > prev) {
+        saveToStorage(realCount);
+      }
       return realCount;
     });
     scheduleSync();
-  }, [realCount, animateChange, scheduleSync, introFinished]);
+  }, [realCount, animateChange, scheduleSync, introFinished, saveToStorage]);
 
   useEffect(() => {
     if (introFinished) return;
@@ -232,6 +270,11 @@ function LiveCounter({ realCount }: { realCount: number }) {
         introRafRef.current = requestAnimationFrame(animateIntro);
       } else {
         setDisplayCount(target);
+        // Save the final intro count if it's higher than stored
+        const stored = getStoredCount();
+        if (target > stored) {
+          saveToStorage(target);
+        }
         setIntroFinished(true);
       }
     };
@@ -243,7 +286,7 @@ function LiveCounter({ realCount }: { realCount: number }) {
         cancelAnimationFrame(introRafRef.current);
       }
     };
-  }, [introFinished]);
+  }, [introFinished, getStoredCount, saveToStorage]);
 
   useEffect(() => {
     if (!introFinished) return;
@@ -253,8 +296,11 @@ function LiveCounter({ realCount }: { realCount: number }) {
       driftTimeoutRef.current = setTimeout(() => {
         setDisplayCount(prev => {
           const increment = Math.random() > 0.5 ? 2 : 1;
+          const newCount = prev + increment;
           animateChange();
-          return prev + increment;
+          // Save the incremented count to localStorage
+          saveToStorage(newCount);
+          return newCount;
         });
         scheduleDrift();
       }, delay);
@@ -267,7 +313,7 @@ function LiveCounter({ realCount }: { realCount: number }) {
         clearTimeout(driftTimeoutRef.current);
       }
     };
-  }, [animateChange, introFinished]);
+  }, [animateChange, introFinished, saveToStorage]);
 
   useEffect(() => {
     if (!introFinished) return;
@@ -877,31 +923,39 @@ export default function Home() {
       return;
     }
 
-    if (!supabase) {
-      setError('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      const { error: supabaseError } = await supabase.from('waitlist').insert([
-        {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           school: formData.school || null,
-        },
-      ]);
+        }),
+      });
 
-      if (supabaseError) throw supabaseError;
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle different error types
+        if (response.status === 429) {
+          const retryAfter = data.retryAfter || 3600;
+          const minutes = Math.ceil(retryAfter / 60);
+          setError(`Too many requests. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`);
+        } else if (response.status === 409) {
+          setError('This email is already registered on the waitlist.');
+        } else {
+          setError(data.error || 'Something went wrong. Please try again.');
+        }
+        return;
+      }
 
       handleSuccessfulSubmission();
     } catch (err: any) {
-      // Handle duplicate email error
-      if (err.message && err.message.includes('duplicate key') && err.message.includes('email')) {
-        setError('This email is already registered on the waitlist.');
-      } else {
-        setError('Something went wrong. Please try again.');
-      }
+      console.error('Submission error:', err);
+      setError('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
