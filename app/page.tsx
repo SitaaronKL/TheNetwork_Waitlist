@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect, useRef, useCallback } from 'react';
 import { supabase, WaitlistEntry } from '../lib/supabase';
 import ConstellationSphere from '../components/ConstellationSphere';
 import JoinPopup from '../components/JoinPopup';
+import { useRouter } from 'next/navigation';
 
 const REFERRAL_TARGET = 3;
 const REFERRAL_BASE_URL = 'https://thenetwork.app';
@@ -426,24 +427,51 @@ function AnimatedGradientText({ text, isDark = false }: { text: string; isDark?:
 
 // Rotating Info Text
 function RotatingInfo({ isDark = false }: { isDark?: boolean }) {
+  const EGG_TEXT = 'CLICK HERE RIGHT NOW!!!';
   const messages = [
     "Beta opening soon",
     "Limited early access",
     "Join before it's too late",
     "Be among the first",
+    "Invite-only beta",
+    "Secure your spot",
+    EGG_TEXT,
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isEggClicking, setIsEggClicking] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % messages.length);
+      if (!isEggClicking) {
+        setCurrentIndex(prev => (prev + 1) % messages.length);
+      }
     }, 2500);
     return () => clearInterval(interval);
-  }, []);
+  }, [isEggClicking, messages.length]);
+
+  const handleEggClick = () => {
+    if (isEggClicking) return;
+    setIsEggClicking(true);
+    setTimeout(() => {
+      router.push('/memo');
+    }, 1000);
+  };
 
   return (
     <p className={`text-sm md:text-base animate-fade-in ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-      {messages[currentIndex]}
+      {messages[currentIndex] === EGG_TEXT ? (
+        <button
+          type="button"
+          onClick={handleEggClick}
+          className={`underline ${isDark ? 'text-white' : 'text-black'} font-bold tracking-wide cursor-pointer`}
+          style={{ textTransform: 'uppercase' }}
+        >
+          {EGG_TEXT}
+        </button>
+      ) : (
+        messages[currentIndex]
+      )}
     </p>
   );
 }

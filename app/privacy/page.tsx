@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Privacy Policy | Asteri',
+  title: 'Privacy Policy | TheNetwork',
   alternates: { canonical: '/privacy' },
 };
 
@@ -8,10 +8,10 @@ export default function PrivacyPage() {
     <main className="legal">
       <h1>Privacy Policy</h1>
       <p><strong>Last Updated:</strong> October 2025</p>
-      <p><strong>Company:</strong> Asteri Labs, Inc. (“Asteri,” “we,” “us,” or “our”)</p>
+      <p><strong>Company:</strong> TheNetwork Labs, Inc. (“TheNetwork,” “we,” “us,” or “our”)</p>
 
       <p>
-        At Asteri, we build technology that remembers you — safely, privately, and with your full
+        At TheNetwork, we build technology that remembers you — safely, privately, and with your full
         control. This Privacy Policy explains how we collect, use, store, and protect your information
         when you use our applications, websites, and related services (collectively, the “Services”).
       </p>
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
       <ul>
         <li>Deliver personalized and proactive AI experiences tailored to your preferences.</li>
         <li>
-          Build and maintain your “Asteri Memory Layer” — a private, user-controlled dataset that powers
+          Build and maintain your “TheNetwork Memory Layer” — a private, user-controlled dataset that powers
           personalization.
         </li>
         <li>Improve product features, performance, and reliability.</li>
@@ -58,10 +58,10 @@ export default function PrivacyPage() {
       <p>Your data is never used for advertising or profiling without explicit consent.</p>
 
       <h2>3. Data Ownership and Control</h2>
-      <p>You always own your data. Asteri operates on the principle of <strong>user-owned memory</strong>:</p>
+      <p>You always own your data. TheNetwork operates on the principle of <strong>user-owned memory</strong>:</p>
       <ul>
         <li>You can view, edit, export, or delete your data at any time.</li>
-        <li>Your memory is private and only used within your Asteri-connected apps.</li>
+        <li>Your memory is private and only used within your TheNetwork-connected apps.</li>
         <li>We do not share personal data with advertisers or third parties without explicit, written permission.</li>
       </ul>
 
@@ -83,7 +83,7 @@ export default function PrivacyPage() {
       <p>
         We retain user data only as long as necessary to provide our Services or as required by law.
         Users may request deletion of their account and all associated data at any time by contacting
-        <a href="mailto:privacy@asteri.ai">privacy@asteri.ai</a>.
+        <a href="mailto:privacy@thenetwork.app">privacy@thenetwork.app</a>.
       </p>
 
       <h2>6. Third-Party Integrations</h2>
@@ -96,7 +96,7 @@ export default function PrivacyPage() {
 
       <h2>7. Children’s Privacy</h2>
       <p>
-        Asteri does not knowingly collect personal data from anyone under the age of 13 (or 16 in the
+        TheNetwork does not knowingly collect personal data from anyone under the age of 13 (or 16 in the
         EU). If we learn that we have inadvertently collected such data, we will delete it immediately.
       </p>
 
@@ -118,7 +118,7 @@ export default function PrivacyPage() {
         <li>Withdraw consent at any time.</li>
       </ul>
       <p>
-        To exercise these rights, contact us at <a href="mailto:privacy@asteri.ai">privacy@asteri.ai</a>.
+        To exercise these rights, contact us at <a href="mailto:privacy@thenetwork.app">privacy@thenetwork.app</a>.
       </p>
 
       <h2>10. Changes to This Policy</h2>
@@ -132,10 +132,10 @@ export default function PrivacyPage() {
       <p>
         If you have questions or concerns about this Privacy Policy, please contact us at:
       </p>
-      <p><strong>Asteri Labs, Inc.</strong></p>
+      <p><strong>TheNetwork Labs, Inc.</strong></p>
       <p>
-        Email: <a href="mailto:privacy@asteri.ai">privacy@asteri.ai</a><br />
-        Website: <a href="http://www.asteri.ai" target="_blank" rel="noopener noreferrer">www.asteri.ai</a><br />
+        Email: <a href="mailto:privacy@thenetwork.app">privacy@thenetwork.app</a><br />
+        Website: <a href="https://www.thenetwork.app" target="_blank" rel="noopener noreferrer">www.thenetwork.app</a><br />
         Address: New York, NY, USA
       </p>
     </main>
