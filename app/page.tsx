@@ -682,11 +682,12 @@ function CTAButton({ onClick, isDark = false }: { onClick: () => void; isDark?: 
   );
 }
 
-export default function Home() {
+export function Home({ source }: { source?: string }) {
   const [formData, setFormData] = useState<WaitlistEntry>({
     name: '',
     email: '',
     school: '',
+    source: source,
   });
   const [realCount, setRealCount] = useState(1050);
 
@@ -889,6 +890,7 @@ export default function Home() {
           name: formData.name,
           email: formData.email,
           school: formData.school || null,
+          source: formData.source || null,
         },
       ]);
 
@@ -1159,4 +1161,8 @@ export default function Home() {
       />
     </main>
   );
+}
+
+export default function HomePage() {
+  return <Home />;
 }

@@ -44,7 +44,8 @@ CREATE TABLE waitlist (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
-  school TEXT
+  school TEXT,
+  source TEXT
 );
 
 -- Create an index on email for faster lookups
@@ -52,6 +53,9 @@ CREATE INDEX idx_waitlist_email ON waitlist(email);
 
 -- Create an index on created_at for sorting
 CREATE INDEX idx_waitlist_created_at ON waitlist(created_at DESC);
+
+-- Create an index on source for tracking analytics
+CREATE INDEX idx_waitlist_source ON waitlist(source);
 ```
 
 4. Click **Run** (or press `Ctrl/Cmd + Enter`)
@@ -151,6 +155,22 @@ If you want to create a protected admin page to view submissions:
 - Never expose your `service_role` key in client-side code
 - Consider adding rate limiting for production to prevent spam
 
+## Updating Existing Tables (Source Tracking)
+
+If you already have a `waitlist` table set up and want to add source tracking, run this SQL:
+
+```sql
+-- Add source column to existing table
+ALTER TABLE waitlist ADD COLUMN source TEXT;
+
+-- Create an index on source for better performance
+CREATE INDEX idx_waitlist_source ON waitlist(source);
+```
+
+This adds the ability to track where users came from (e.g., QR codes at different locations).
+
+See `TRACKING_PATHS_GUIDE.md` for details on how to use source tracking.
+
 ## Next Steps
 
 Once you have submissions coming in, you might want to:
@@ -158,4 +178,5 @@ Once you have submissions coming in, you might want to:
 - Create an automated email confirmation system
 - Build an admin dashboard to manage submissions
 - Export data periodically for your CRM or outreach tools
+- Use source tracking to measure which marketing channels work best (see `TRACKING_PATHS_GUIDE.md`)
 

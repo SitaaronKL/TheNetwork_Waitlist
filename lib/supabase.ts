@@ -13,5 +13,6 @@ export type WaitlistEntry = {
   name: string;
   email: string;
   school?: string;
+  source?: string;
 };
 
