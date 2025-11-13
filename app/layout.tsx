@@ -4,6 +4,9 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'TheNetwork',
   description: 'Asteri startup memo outlining our vision for AI that understands human behavior at a subconscious level',
+  icons: {
+    icon: '/app_icon.svg',
+  },
 }
 
 export default function RootLayout({
