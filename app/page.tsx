@@ -152,15 +152,24 @@ const MIN_LOCATION_CHARS = 2;
 
 // Live Counter Component
 function LiveCounter({ realCount }: { realCount: number }) {
+  const STORAGE_KEY = 'waitlistDisplayCount';
+
+  // Always render a value that won't cause hydration mismatch
   const [displayCount, setDisplayCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [introFinished, setIntroFinished] = useState(false);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const driftTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const syncIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const latestRealCountRef = useRef(realCount);
   const introRafRef = useRef<number | null>(null);
+  const [introDone, setIntroDone] = useState(false);
+
+  const saveToStorage = useCallback((count: number) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(STORAGE_KEY, String(count));
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const animateChange = useCallback(() => {
     setIsAnimating(true);
@@ -170,133 +179,90 @@ function LiveCounter({ realCount }: { realCount: number }) {
     animationTimeoutRef.current = setTimeout(() => setIsAnimating(false), 300);
   }, []);
 
-  const startSmoothSync = useCallback(() => {
-    if (syncIntervalRef.current) {
-      clearInterval(syncIntervalRef.current);
-      syncIntervalRef.current = null;
-    }
+  // Restore from localStorage once on mount (sticky max) with a light intro count-up from 0
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const stored = raw ? parseInt(raw, 10) : NaN;
+      const startValue = 0; // always animate from 0 for perceived legitimacy
+      // Choose target as the stored max if it exists, otherwise use realCount
+      const target = Number.isNaN(stored) ? realCount : Math.max(stored, realCount);
 
-    syncIntervalRef.current = setInterval(() => {
-      setDisplayCount(prev => {
-        const target = latestRealCountRef.current;
-        if (prev === target) {
-          if (syncIntervalRef.current) {
-            clearInterval(syncIntervalRef.current);
-            syncIntervalRef.current = null;
+      // If no stored value yet, initialize storage and ensure UI shows at least realCount
+      if (Number.isNaN(stored)) {
+        saveToStorage(target);
+        // fall through to animate from 0 -> target
+      }
+
+      // Animate from startValue → target after hydration to avoid SSR mismatch
+      if (target > startValue) {
+        const duration = 1200;
+        let start: number | null = null;
+        const step = (ts: number) => {
+          if (start === null) start = ts;
+          const progress = Math.min((ts - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+          const next = Math.round(startValue + (target - startValue) * eased);
+          setDisplayCount(next);
+          if (progress < 1) {
+            introRafRef.current = requestAnimationFrame(step);
+          } else {
+            // Persist the final target so refresh keeps the higher value
+            saveToStorage(target);
+            setIntroDone(true);
           }
-          return prev;
-        }
-        const direction = target > prev ? 1 : -1;
-        animateChange();
-        return prev + direction;
-      });
-    }, 600);
-  }, [animateChange]);
-
-  const scheduleSync = useCallback(() => {
-    if (syncTimeoutRef.current) {
-      clearTimeout(syncTimeoutRef.current);
-      syncTimeoutRef.current = null;
-    }
-    syncTimeoutRef.current = setTimeout(() => {
-      startSmoothSync();
-      scheduleSync();
-    }, 5 * 60 * 1000);
-  }, [startSmoothSync]);
-
-  useEffect(() => {
-    latestRealCountRef.current = realCount;
-    if (!introFinished) return;
-    setDisplayCount(prev => {
-      if (prev === realCount) return prev;
-      // Real count only moves upward, so direct sync is fine.
-      animateChange();
-      return realCount;
-    });
-    scheduleSync();
-  }, [realCount, animateChange, scheduleSync, introFinished]);
-
-  useEffect(() => {
-    if (introFinished) return;
-
-    let start: number | null = null;
-    const duration = 1700;
-
-    const animateIntro = (timestamp: number) => {
-      if (start === null) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      const target = latestRealCountRef.current;
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic for satisfying finish
-      setDisplayCount(Math.round(target * eased));
-      if (progress < 1) {
-        introRafRef.current = requestAnimationFrame(animateIntro);
+        };
+        introRafRef.current = requestAnimationFrame(step);
       } else {
+        // Nothing to animate; make sure display and storage are aligned
         setDisplayCount(target);
-        setIntroFinished(true);
+        if (target !== stored) saveToStorage(target);
+        setIntroDone(true);
       }
-    };
-
-    introRafRef.current = requestAnimationFrame(animateIntro);
-
+    } catch {
+      // ignore
+    }
     return () => {
-      if (introRafRef.current) {
-        cancelAnimationFrame(introRafRef.current);
-      }
+      if (introRafRef.current) cancelAnimationFrame(introRafRef.current);
     };
-  }, [introFinished]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once
 
+  // When the real server count rises, stick to the max and persist
   useEffect(() => {
-    if (!introFinished) return;
+    if (!introDone) return; // wait until intro finishes
+    setDisplayCount(prev => {
+      const next = Math.max(prev, realCount);
+      if (next !== prev) {
+        animateChange();
+        saveToStorage(next);
+      }
+      return next;
+    });
+  }, [realCount, introDone, animateChange, saveToStorage]);
 
-    const scheduleDrift = () => {
-      const delay = 15000 + Math.random() * 15000;
+  // Gentle drift up over time, persisting after each increment
+  useEffect(() => {
+    const schedule = () => {
+      const delay = 15000 + Math.random() * 15000; // 15–30s
       driftTimeoutRef.current = setTimeout(() => {
         setDisplayCount(prev => {
           const increment = Math.random() > 0.5 ? 2 : 1;
+          const next = prev + increment;
           animateChange();
-          return prev + increment;
+          saveToStorage(next);
+          return next;
         });
-        scheduleDrift();
+        schedule();
       }, delay);
     };
-
-    scheduleDrift();
-
+    schedule();
     return () => {
-      if (driftTimeoutRef.current) {
-        clearTimeout(driftTimeoutRef.current);
-      }
+      if (driftTimeoutRef.current) clearTimeout(driftTimeoutRef.current);
+      if (animationTimeoutRef.current) clearTimeout(animationTimeoutRef.current);
     };
-  }, [animateChange, introFinished]);
-
-  useEffect(() => {
-    if (!introFinished) return;
-    scheduleSync();
-
-    return () => {
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-        syncTimeoutRef.current = null;
-      }
-    };
-  }, [introFinished, scheduleSync]);
-
-  useEffect(() => {
-    return () => {
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current);
-      }
-      if (syncIntervalRef.current) {
-        clearInterval(syncIntervalRef.current);
-      }
-      if (driftTimeoutRef.current) {
-        clearTimeout(driftTimeoutRef.current);
-      }
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
-    };
-  }, []);
+  }, [animateChange, saveToStorage]);
 
   return (
     <div className="text-center mb-4">
@@ -762,20 +728,31 @@ export function Home({ source }: { source?: string }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const token =
-      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random()}`;
+    
+    // Check if token already exists in localStorage
+    let token = localStorage.getItem('refSessionToken');
+    
+    if (!token) {
+      // Only create new token if one doesn't exist
+      token =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`;
+      localStorage.setItem('refSessionToken', token);
+    }
+    
+    // Initialize refVisits if it doesn't exist
+    if (!localStorage.getItem('refVisits')) {
+      localStorage.setItem('refVisits', '0');
+    }
+    
     setSessionToken(token);
-    localStorage.setItem('refSessionToken', token);
-    localStorage.setItem('refVisits', '0');
 
     return () => {
       if (invitePulseTimeoutRef.current) {
         clearTimeout(invitePulseTimeoutRef.current);
       }
-      localStorage.removeItem('refSessionToken');
-      localStorage.removeItem('refVisits');
+      // Don't remove from localStorage on unmount - we want it to persist
     };
   }, []);
 
@@ -878,32 +855,40 @@ export function Home({ source }: { source?: string }) {
       return;
     }
 
-    if (!supabase) {
-      setError('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      const { error: supabaseError } = await supabase.from('waitlist').insert([
-        {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           school: formData.school || null,
           source: formData.source || null,
-        },
-      ]);
+        }),
+      });
 
-      if (supabaseError) throw supabaseError;
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle different error types
+        if (response.status === 429) {
+          const retryAfter = data.retryAfter || 3600;
+          const minutes = Math.ceil(retryAfter / 60);
+          setError(`Too many requests. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`);
+        } else if (response.status === 409) {
+          setError('This email is already registered on the waitlist.');
+        } else {
+          setError(data.error || 'Something went wrong. Please try again.');
+        }
+        return;
+      }
 
       handleSuccessfulSubmission();
     } catch (err: any) {
-      // Handle duplicate email error
-      if (err.message && err.message.includes('duplicate key') && err.message.includes('email')) {
-        setError('This email is already registered on the waitlist.');
-      } else {
-        setError('Something went wrong. Please try again.');
-      }
+      console.error('Submission error:', err);
+      setError('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
