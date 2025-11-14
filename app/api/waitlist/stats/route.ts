@@ -70,9 +70,9 @@ export async function GET(_req: NextRequest) {
   // Recent signups (small selection)
   const { data: recentRows, error: recentError } = await supabase
     .from('waitlist')
-    .select('*')
+    .select('id, name, email, source, school, created_at')
     .order('id', { ascending: false })
-    .limit(25);
+    .limit(500);
 
   if (recentError) {
     return NextResponse.json({
@@ -91,6 +91,7 @@ export async function GET(_req: NextRequest) {
     email: r.email,
     source: r.source ?? null,
     school: r.school ?? null,
+    created_at: r.created_at ?? null,
   }));
 
   return NextResponse.json({
