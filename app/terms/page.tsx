@@ -147,7 +147,7 @@ export default function TermsPage() {
       <p>
         We may suspend or terminate your account if you violate these Terms, misuse our Services, or
         engage in activities that harm the platform or other users. You may terminate your account at any
-        time by contacting <a href="mailto:support@thenetwork.app">support@thenetwork.app</a>.
+        time by contacting <a href="mailto:support@thenetwork.life">support@thenetwork.life</a>.
       </p>
 
       <h2>15. Changes to These Terms</h2>
@@ -161,8 +161,8 @@ export default function TermsPage() {
       <p>If you have questions or concerns about these Terms, please contact us at:</p>
       <p><strong>TheNetwork Labs, Inc.</strong></p>
       <p>
-        Email: <a href="mailto:legal@thenetwork.app">legal@thenetwork.app</a><br />
-        Website: <a href="https://www.thenetwork.app" target="_blank" rel="noopener noreferrer">www.thenetwork.app</a><br />
+        Email: <a href="mailto:legal@thenetwork.life">legal@thenetwork.life</a><br />
+        Website: <a href="https://www.thenetwork.life" target="_blank" rel="noopener noreferrer">www.thenetwork.life</a><br />
         Address: New York, NY, USA
       </p>
     </main>

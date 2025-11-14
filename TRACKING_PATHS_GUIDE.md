@@ -6,7 +6,7 @@ This guide explains how to create, manage, and track different waitlist signup s
 
 The website now supports **dynamic path-based tracking**. Any path you create automatically tracks signups without requiring code changes.
 
-When someone visits `https://thenetwork.app/your-path` and joins the waitlist, "your-path" is automatically saved in the database.
+When someone visits `https://thenetwork.life/your-path` and joins the waitlist, "your-path" is automatically saved in the database.
 
 ## Creating New Tracking Paths
 
@@ -15,15 +15,15 @@ When someone visits `https://thenetwork.app/your-path` and joins the waitlist, "
 You don't need to edit any code to create new tracking paths. Simply use any URL path you want:
 
 **Examples:**
-- `https://thenetwork.app/path-1` → Tracks as "path-1"
-- `https://thenetwork.app/stanford` → Tracks as "stanford"
-- `https://thenetwork.app/booth-3` → Tracks as "booth-3"
-- `https://thenetwork.app/sf-meetup-jan24` → Tracks as "sf-meetup-jan24"
+- `https://thenetwork.life/path-1` → Tracks as "path-1"
+- `https://thenetwork.life/stanford` → Tracks as "stanford"
+- `https://thenetwork.life/booth-3` → Tracks as "booth-3"
+- `https://thenetwork.life/sf-meetup-jan24` → Tracks as "sf-meetup-jan24"
 
 ### Creating QR Codes
 
 1. **Choose a unique path name** (see naming best practices below)
-2. **Create the full URL**: `https://thenetwork.app/[your-path-name]`
+2. **Create the full URL**: `https://thenetwork.life/[your-path-name]`
 3. **Generate a QR code** using any QR code generator:
    - [QR Code Generator](https://www.qr-code-generator.com/)
    - [QR Code Monkey](https://www.qrcode-monkey.com/)
@@ -34,7 +34,7 @@ You don't need to edit any code to create new tracking paths. Simply use any URL
 
 Let's say you want to track signups from Stanford:
 
-1. Create URL: `https://thenetwork.app/stanford`
+1. Create URL: `https://thenetwork.life/stanford`
 2. Generate QR code pointing to that URL
 3. Print QR code and place it on campus
 4. When students scan and sign up, "stanford" is automatically saved as their source
@@ -186,7 +186,7 @@ Useful for measuring growth over time.
 
 Before printing QR codes, always test:
 
-1. Visit your path in a browser: `https://thenetwork.app/your-path-name`
+1. Visit your path in a browser: `https://thenetwork.life/your-path-name`
 2. Join the waitlist with a test email
 3. Check Supabase to confirm the source was recorded correctly
 4. If testing locally: `http://localhost:3000/your-path-name`

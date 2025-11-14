@@ -7,7 +7,7 @@ import JoinPopup from '../components/JoinPopup';
 import { useRouter } from 'next/navigation';
 
 const REFERRAL_TARGET = 3;
-const REFERRAL_BASE_URL = 'https://thenetwork.app';
+const REFERRAL_BASE_URL = 'https://thenetwork.life';
 
 const encodeReferralCode = (value: string) => {
   try {

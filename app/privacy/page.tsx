@@ -83,7 +83,7 @@ export default function PrivacyPage() {
       <p>
         We retain user data only as long as necessary to provide our Services or as required by law.
         Users may request deletion of their account and all associated data at any time by contacting
-        <a href="mailto:privacy@thenetwork.app">privacy@thenetwork.app</a>.
+        <a href="mailto:privacy@thenetwork.life">privacy@thenetwork.life</a>.
       </p>
 
       <h2>6. Third-Party Integrations</h2>
@@ -118,7 +118,7 @@ export default function PrivacyPage() {
         <li>Withdraw consent at any time.</li>
       </ul>
       <p>
-        To exercise these rights, contact us at <a href="mailto:privacy@thenetwork.app">privacy@thenetwork.app</a>.
+        To exercise these rights, contact us at <a href="mailto:privacy@thenetwork.life">privacy@thenetwork.life</a>.
       </p>
 
       <h2>10. Changes to This Policy</h2>
@@ -134,8 +134,8 @@ export default function PrivacyPage() {
       </p>
       <p><strong>TheNetwork Labs, Inc.</strong></p>
       <p>
-        Email: <a href="mailto:privacy@thenetwork.app">privacy@thenetwork.app</a><br />
-        Website: <a href="https://www.thenetwork.app" target="_blank" rel="noopener noreferrer">www.thenetwork.app</a><br />
+        Email: <a href="mailto:privacy@thenetwork.life">privacy@thenetwork.life</a><br />
+        Website: <a href="https://www.thenetwork.life" target="_blank" rel="noopener noreferrer">www.thenetwork.life</a><br />
         Address: New York, NY, USA
       </p>
     </main>

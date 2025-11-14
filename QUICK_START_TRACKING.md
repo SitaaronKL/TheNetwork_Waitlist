@@ -16,9 +16,9 @@ CREATE INDEX idx_waitlist_source ON waitlist(source);
 Any path works automatically! Just add it to your domain:
 
 ```
-https://thenetwork.app/path-1
-https://thenetwork.app/stanford
-https://thenetwork.app/booth-3
+https://thenetwork.life/path-1
+https://thenetwork.life/stanford
+https://thenetwork.life/booth-3
 ```
 
 ## 3. Generate QR Codes
