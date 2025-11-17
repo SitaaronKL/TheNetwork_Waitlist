@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect, useRef, useCallback } from 'react';
 import { supabase, WaitlistEntry } from '../lib/supabase';
 import ConstellationSphere from '../components/ConstellationSphere';
 import JoinPopup from '../components/JoinPopup';
+import InstagramFloat from '../components/InstagramFloat';
 import { useRouter } from 'next/navigation';
 
 const REFERRAL_TARGET = 3;
@@ -1025,6 +1026,7 @@ export function Home({ source }: { source?: string }) {
         : `${REFERRAL_BASE_URL}?ref=${encodeReferralCode(formData.email.trim().toLowerCase())}`);
     return (
       <main className="min-h-screen flex items-center justify-center bg-black px-4">
+        <InstagramFloat />
         <div className="max-w-xl w-full text-center text-white rounded-3xl border border-white/20 px-8 py-12 shadow-[0_20px_70px_rgba(0,0,0,0.35)] animate-fade-in space-y-8">
           <p className="text-sm uppercase tracking-[0.3em] text-gray-400">
             Welcome to TheNetwork
@@ -1070,6 +1072,7 @@ export function Home({ source }: { source?: string }) {
 
   return (
     <main style={{ backgroundColor: '#F2F2F2' }}>
+      <InstagramFloat />
       <JoinPopup />
       {/* Initial Landing Section - Full Screen */}
       <section className="relative h-100svh flex items-center justify-center px-4 sm:px-6 bg-black overflow-hidden">
