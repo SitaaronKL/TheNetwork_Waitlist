@@ -33,29 +33,45 @@ function formatDateTime(value?: string | null): string {
 export default function AdminDashboard() {
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'nameAsc' | 'nameDesc'>('newest');
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+
+  const loadStats = async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+        setError('');
+      }
+      
+      // Force fresh data by adding timestamp to URL
+      const timestamp = Date.now();
+      const res = await fetch(`/api/waitlist/stats?_t=${timestamp}`, { 
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      if (!res.ok) throw new Error(`Failed to load stats (${res.status})`);
+      const json = await res.json();
+      setStats(json);
+      setLastRefresh(new Date());
+    } catch (e: any) {
+      setError(e?.message ?? 'Failed to load stats');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    let isMounted = true;
-    const load = async () => {
-      try {
-        const res = await fetch('/api/waitlist/stats', { cache: 'no-store' });
-        if (!res.ok) throw new Error(`Failed to load stats (${res.status})`);
-        const json = await res.json();
-        if (isMounted) setStats(json);
-      } catch (e: any) {
-        if (isMounted) setError(e?.message ?? 'Failed to load stats');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    load();
-    return () => {
-      isMounted = false;
-    };
+    loadStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const topSources = useMemo(() => (stats?.bySource ?? []).slice(0, 12), [stats]);
@@ -102,8 +118,34 @@ export default function AdminDashboard() {
   return (
     <main className="min-h-screen bg-black text-white px-6 py-10">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-bold mb-6 font-brand">Waitlist Dashboard</h1>
-        <p className="text-gray-400 mb-10">Overview of signups, paths and locations.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold font-brand">Waitlist Dashboard</h1>
+            <p className="text-gray-400 mt-2">Overview of signups, paths and locations.</p>
+            {lastRefresh && (
+              <p className="text-gray-500 text-sm mt-1">
+                Last updated: {lastRefresh.toLocaleTimeString()}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => loadStats(true)}
+            disabled={loading || refreshing}
+            className="px-6 py-3 rounded-xl bg-white text-black font-semibold hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center sm:self-start"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              strokeWidth={2} 
+              stroke="currentColor" 
+              className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            {refreshing ? 'Refreshing...' : 'Refresh Data'}
+          </button>
+        </div>
 
         {loading && (
           <div className="text-gray-300">Loading stats…</div>
