@@ -1110,12 +1110,12 @@ export function Home({ source }: { source?: string }) {
       {/* Image Gallery Section - "THIS COULD BE YOU!" */}
       <section className="relative min-h-screen bg-gray-200 overflow-hidden flex flex-col py-12 px-6">
         {/* Image Grid */}
-        <div className="flex-1 flex items-start justify-center pt-8 pb-32">
+        <div className="flex-1 flex items-start justify-center pt-8 pb-40 md:pb-48">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl w-full">
             {/* Image 1 */}
             <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden">
               <img 
-                src="/components/pictures/IMG_6877.jpg" 
+                src="/1-community.jpeg" 
                 alt="Community moment" 
                 className="w-full h-full object-cover"
               />
@@ -1124,7 +1124,7 @@ export function Home({ source }: { source?: string }) {
             {/* Image 2 */}
             <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden">
               <img 
-                src="/components/pictures/IMG_6886.jpg" 
+                src="/2-community46453c202eca84241474bc57055aad3d.jpeg" 
                 alt="Community moment" 
                 className="w-full h-full object-cover"
               />
@@ -1133,7 +1133,7 @@ export function Home({ source }: { source?: string }) {
             {/* Image 3 */}
             <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden">
               <img 
-                src="/components/pictures/IMG_2097.JPG" 
+                src="/3-community.jpeg" 
                 alt="Community moment" 
                 className="w-full h-full object-cover"
               />
@@ -1142,7 +1142,7 @@ export function Home({ source }: { source?: string }) {
         </div>
         
         {/* Large Text */}
-        <div className="absolute bottom-24 left-6 right-6 md:left-12 md:right-12">
+        <div className="absolute bottom-12 left-6 right-6 md:left-12 md:right-12 md:bottom-16">
           <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-black leading-none tracking-tight">
             THIS COULD BE YOU!
           </h2>
@@ -1166,7 +1166,7 @@ export function Home({ source }: { source?: string }) {
             style={{
               // Scale with viewport so it stays one line across the top (desktop/tablet),
               // while still readable on smaller screens.
-              fontSize: 'clamp(1.5rem, 6vw, 9rem)',
+              fontSize: 'clamp(1.5rem, 5vw, 9rem)',
             }}
           >
             WE RUN ON <span className="border-b-[3px] border-black pb-2">SIGNAL INTELLIGENCE.</span>
