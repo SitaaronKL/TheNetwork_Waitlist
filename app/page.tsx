@@ -1156,7 +1156,7 @@ export function Home({ source }: { source?: string }) {
           paddingTop: '120px',
           paddingBottom: '80px',
           paddingLeft: '38px',
-          paddingRight: '24px',
+          paddingRight: '38px',
         }}
       >
         {/* Content */}
@@ -1166,7 +1166,7 @@ export function Home({ source }: { source?: string }) {
             style={{
               // Scale with viewport so it stays one line across the top (desktop/tablet),
               // while still readable on smaller screens.
-              fontSize: 'clamp(2.25rem, 8.5vw, 9rem)',
+              fontSize: 'clamp(1.5rem, 6vw, 9rem)',
             }}
           >
             WE RUN ON <span className="border-b-[3px] border-black pb-2">SIGNAL INTELLIGENCE.</span>
