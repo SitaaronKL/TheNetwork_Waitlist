@@ -700,6 +700,7 @@ export function Home({ source }: { source?: string }) {
   const hideSuggestionsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const invitePulseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasInvitePulseMountedRef = useRef(false);
+  const transitionSectionRef = useRef<HTMLElement>(null);
 
   const updateLocationSuggestions = useCallback((query: string) => {
     const trimmed = query.trim().toLowerCase();
@@ -1037,6 +1038,130 @@ export function Home({ source }: { source?: string }) {
     );
   }
 
+  // Checkerboard transition scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      const section = transitionSectionRef.current;
+      if (!section) return;
+
+      const rect = section.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      
+      // Calculate scroll progress through the section (0 to 1)
+      const scrollProgress = Math.max(0, Math.min(1, 1 - (rect.top / windowHeight)));
+
+      // Find all transition stages
+      const stage1 = section.querySelector('.transition-stage-1') as HTMLElement;
+      const stage2 = section.querySelector('.transition-stage-2') as HTMLElement;
+      const stage3 = section.querySelector('.transition-stage-3') as HTMLElement;
+      const stage4 = section.querySelector('.transition-stage-4') as HTMLElement;
+      const stage5 = section.querySelector('.transition-stage-5') as HTMLElement;
+      const stage6 = section.querySelector('.transition-stage-6') as HTMLElement;
+      const stage7 = section.querySelector('.transition-stage-7') as HTMLElement;
+      const stage8 = section.querySelector('.transition-stage-8') as HTMLElement;
+
+      if (!stage1 || !stage2 || !stage3 || !stage4 || !stage5 || !stage6 || !stage7 || !stage8) return;
+
+      // Animate through 8 stages based on scroll progress
+      const stageWidth = 1 / 8;
+      
+      if (scrollProgress < stageWidth) {
+        // Stage 1
+        const progress = scrollProgress / stageWidth;
+        stage1.style.opacity = String(progress);
+        stage2.style.opacity = '0';
+        stage3.style.opacity = '0';
+        stage4.style.opacity = '0';
+        stage5.style.opacity = '0';
+        stage6.style.opacity = '0';
+        stage7.style.opacity = '0';
+        stage8.style.opacity = '0';
+      } else if (scrollProgress < stageWidth * 2) {
+        // Stage 2
+        const progress = (scrollProgress - stageWidth) / stageWidth;
+        stage1.style.opacity = String(1 - progress);
+        stage2.style.opacity = String(progress);
+        stage3.style.opacity = '0';
+        stage4.style.opacity = '0';
+        stage5.style.opacity = '0';
+        stage6.style.opacity = '0';
+        stage7.style.opacity = '0';
+        stage8.style.opacity = '0';
+      } else if (scrollProgress < stageWidth * 3) {
+        // Stage 3
+        const progress = (scrollProgress - stageWidth * 2) / stageWidth;
+        stage1.style.opacity = '0';
+        stage2.style.opacity = String(1 - progress);
+        stage3.style.opacity = String(progress);
+        stage4.style.opacity = '0';
+        stage5.style.opacity = '0';
+        stage6.style.opacity = '0';
+        stage7.style.opacity = '0';
+        stage8.style.opacity = '0';
+      } else if (scrollProgress < stageWidth * 4) {
+        // Stage 4
+        const progress = (scrollProgress - stageWidth * 3) / stageWidth;
+        stage1.style.opacity = '0';
+        stage2.style.opacity = '0';
+        stage3.style.opacity = String(1 - progress);
+        stage4.style.opacity = String(progress);
+        stage5.style.opacity = '0';
+        stage6.style.opacity = '0';
+        stage7.style.opacity = '0';
+        stage8.style.opacity = '0';
+      } else if (scrollProgress < stageWidth * 5) {
+        // Stage 5
+        const progress = (scrollProgress - stageWidth * 4) / stageWidth;
+        stage1.style.opacity = '0';
+        stage2.style.opacity = '0';
+        stage3.style.opacity = '0';
+        stage4.style.opacity = String(1 - progress);
+        stage5.style.opacity = String(progress);
+        stage6.style.opacity = '0';
+        stage7.style.opacity = '0';
+        stage8.style.opacity = '0';
+      } else if (scrollProgress < stageWidth * 6) {
+        // Stage 6
+        const progress = (scrollProgress - stageWidth * 5) / stageWidth;
+        stage1.style.opacity = '0';
+        stage2.style.opacity = '0';
+        stage3.style.opacity = '0';
+        stage4.style.opacity = '0';
+        stage5.style.opacity = String(1 - progress);
+        stage6.style.opacity = String(progress);
+        stage7.style.opacity = '0';
+        stage8.style.opacity = '0';
+      } else if (scrollProgress < stageWidth * 7) {
+        // Stage 7
+        const progress = (scrollProgress - stageWidth * 6) / stageWidth;
+        stage1.style.opacity = '0';
+        stage2.style.opacity = '0';
+        stage3.style.opacity = '0';
+        stage4.style.opacity = '0';
+        stage5.style.opacity = '0';
+        stage6.style.opacity = String(1 - progress);
+        stage7.style.opacity = String(progress);
+        stage8.style.opacity = '0';
+      } else {
+        // Stage 8 - final stage
+        const progress = (scrollProgress - stageWidth * 7) / stageWidth;
+        stage1.style.opacity = '0';
+        stage2.style.opacity = '0';
+        stage3.style.opacity = '0';
+        stage4.style.opacity = '0';
+        stage5.style.opacity = '0';
+        stage6.style.opacity = '0';
+        stage7.style.opacity = String(1 - progress);
+        stage8.style.opacity = String(progress);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <main style={{ backgroundColor: '#FFFFFF' }}>
       <JoinPopup />
@@ -1086,6 +1211,104 @@ export function Home({ source }: { source?: string }) {
         </div>
       </nav>
 
+      {/* Transition Section - Animated checkerboard from black to white */}
+      <section 
+        ref={transitionSectionRef}
+        className="relative min-h-screen overflow-hidden"
+        id="checkerboard-transition"
+        style={{ 
+          background: 'black',
+        }}
+      >
+        {/* Stage 1: Small white circles */}
+        <div 
+          className="absolute inset-0 transition-stage-1"
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 3px, transparent 3px)',
+            backgroundSize: '40px 40px',
+            backgroundPosition: '0 0',
+            opacity: 0,
+          }}
+        />
+        
+        {/* Stage 2: Medium circles */}
+        <div 
+          className="absolute inset-0 transition-stage-2"
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 8px, transparent 8px)',
+            backgroundSize: '40px 40px',
+            backgroundPosition: '0 0',
+            opacity: 0,
+          }}
+        />
+        
+        {/* Stage 3: Large circles */}
+        <div 
+          className="absolute inset-0 transition-stage-3"
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 13px, transparent 13px)',
+            backgroundSize: '40px 40px',
+            backgroundPosition: '0 0',
+            opacity: 0,
+          }}
+        />
+        
+        {/* Stage 4: Circles grow corners to become squares */}
+        <div 
+          className="absolute inset-0 transition-stage-4"
+          style={{
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect x=\'8\' y=\'8\' width=\'24\' height=\'24\' rx=\'4\' fill=\'white\'/%3E%3C/svg%3E")',
+            backgroundSize: '40px 40px',
+            backgroundPosition: '0 0',
+            opacity: 0,
+          }}
+        />
+        
+        {/* Stage 5: Larger squares */}
+        <div 
+          className="absolute inset-0 transition-stage-5"
+          style={{
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect x=\'4\' y=\'4\' width=\'32\' height=\'32\' rx=\'2\' fill=\'white\'/%3E%3C/svg%3E")',
+            backgroundSize: '40px 40px',
+            backgroundPosition: '0 0',
+            opacity: 0,
+          }}
+        />
+        
+        {/* Stage 6: Much larger squares, fully overlapping */}
+        <div 
+          className="absolute inset-0 transition-stage-6"
+          style={{
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect x=\'0\' y=\'0\' width=\'40\' height=\'40\' rx=\'0\' fill=\'white\'/%3E%3C/svg%3E")',
+            backgroundSize: '40px 40px',
+            backgroundPosition: '0 0',
+            opacity: 0,
+          }}
+        />
+        
+        {/* Stage 7: Keep growing */}
+        <div 
+          className="absolute inset-0 transition-stage-7"
+          style={{
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect x=\'-2\' y=\'-2\' width=\'44\' height=\'44\' fill=\'white\'/%3E%3C/svg%3E")',
+            backgroundSize: '40px 40px',
+            backgroundPosition: '0 0',
+            opacity: 0,
+          }}
+        />
+        
+        {/* Stage 8: Even bigger - final stage */}
+        <div 
+          className="absolute inset-0 transition-stage-8"
+          style={{
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Crect x=\'-5\' y=\'-5\' width=\'50\' height=\'50\' fill=\'white\'/%3E%3C/svg%3E")',
+            backgroundSize: '40px 40px',
+            backgroundPosition: '0 0',
+            opacity: 0,
+          }}
+        />
+      </section>
+
       {/* Marketing Section - White background with copy */}
       <section 
         className="relative min-h-screen bg-white overflow-hidden flex items-center"
@@ -1096,13 +1319,11 @@ export function Home({ source }: { source?: string }) {
           paddingRight: '24px',
         }}
       >
-        
         {/* Main Content */}
-        <div style={{ width: '100%' }}>
+        <div style={{ width: '100%', position: 'relative', zIndex: 10 }}>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left">
             We turn your digital DNA into a personalized <br className="hidden lg:block" />
-            feed of people, moments, and opportunities that feel <br className="hidden lg:block" />
-            unnervingly right.
+            feed of people, moments, and opportunities that feel unnervingly right.
           </h2>
         </div>
       </section>
