@@ -677,7 +677,7 @@ function CTAButton({ onClick, isDark = false }: { onClick: () => void; isDark?: 
   );
 }
 
-export function Home({ source }: { source?: string }) {
+function Home({ source }: { source?: string }) {
   const [formData, setFormData] = useState<WaitlistEntry>({
     name: '',
     email: '',
