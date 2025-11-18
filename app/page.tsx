@@ -1155,14 +1155,19 @@ export function Home({ source }: { source?: string }) {
         style={{ 
           paddingTop: '120px',
           paddingBottom: '80px',
-          paddingLeft: '38px', 
+          paddingLeft: '38px',
           paddingRight: '24px',
         }}
       >
         {/* Content */}
-        <div style={{ maxWidth: '1108px', width: '100%' }}>
+        <div style={{ width: '100%' }}>
           <h2
-            className="font-bold text-black mb-24 leading-tight whitespace-normal text-[clamp(2.25rem,8vw,7rem)]"
+            className="font-bold text-black mb-24 leading-none whitespace-nowrap"
+            style={{
+              // Scale with viewport so it stays one line across the top (desktop/tablet),
+              // while still readable on smaller screens.
+              fontSize: 'clamp(2.25rem, 8.5vw, 9rem)',
+            }}
           >
             WE RUN ON <span className="border-b-[3px] border-black pb-2">SIGNAL INTELLIGENCE.</span>
           </h2>
