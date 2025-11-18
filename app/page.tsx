@@ -1161,7 +1161,9 @@ export function Home({ source }: { source?: string }) {
       >
         {/* Content */}
         <div style={{ maxWidth: '1108px', width: '100%' }}>
-          <h2 className="text-4xl sm:text-5xl md:text-8xl font-bold text-black mb-24 leading-tight whitespace-normal md:whitespace-nowrap">
+          <h2
+            className="font-bold text-black mb-24 leading-tight whitespace-normal text-[clamp(2.25rem,8vw,7rem)]"
+          >
             WE RUN ON <span className="border-b-[3px] border-black pb-2">SIGNAL INTELLIGENCE.</span>
           </h2>
           
