@@ -45,7 +45,7 @@ export default function InstagramFloat() {
   return (
     <button
       onClick={handleClick}
-      className={`fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-700 ease-in-out shadow-lg hover:scale-110 active:scale-95 ${
+      className={`fixed bottom-24 left-6 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-700 ease-in-out shadow-lg hover:scale-110 active:scale-95 ${
         isDark
           ? 'bg-black text-white hover:bg-gray-800'
           : 'bg-white text-black hover:bg-gray-100'

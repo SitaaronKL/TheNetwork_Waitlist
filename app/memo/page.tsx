@@ -45,7 +45,7 @@ export default function MemoPage() {
               <p>You watch what you like, and keep only really watching that.</p>
               <p>But that implicitly tells who you are, your interests.</p>
               <p>I believe that by connecting you to people like that. We build a network who you can really talk to.</p>
-              <p>I believe that as college (or really the world) gets lonlier and lonlier something like the Network becomes even more necessary.</p>
+              <p>I believe that as college (or really the world) gets lonelier and lonelier something like the Network becomes even more necessary.</p>
             </div>
           </section>
 

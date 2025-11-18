@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, FormEvent, useEffect, useRef, useCallback } from 'react';
-import { supabase, WaitlistEntry } from '../lib/supabase';
-import ConstellationSphere from '../components/ConstellationSphere';
-import JoinPopup from '../components/JoinPopup';
-import InstagramFloat from '../components/InstagramFloat';
+import { supabase, WaitlistEntry } from '../../lib/supabase';
+import ConstellationSphere from '../../components/ConstellationSphere';
+import JoinPopup from '../../components/JoinPopup';
+import InstagramFloat from '../../components/InstagramFloat';
 import { useRouter } from 'next/navigation';
 
 const REFERRAL_TARGET = 3;
@@ -692,9 +692,11 @@ export function Home({ source }: { source?: string }) {
   const [error, setError] = useState('');
   const [userRank, setUserRank] = useState(4000); // Placeholder rank
   const [referralLink, setReferralLink] = useState('');
+  const [isDarkSection, setIsDarkSection] = useState(false);
   const [sessionToken, setSessionToken] = useState('');
   const [invitedCount, setInvitedCount] = useState(0);
   const [invitePulse, setInvitePulse] = useState(false);
+  const heroSectionRef = useRef<HTMLElement>(null);
   const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const hideSuggestionsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -982,6 +984,37 @@ export function Home({ source }: { source?: string }) {
     }
   }, []);
 
+  // Scroll detection for color flip animation
+  useEffect(() => {
+    const currentRef = heroSectionRef.current;
+    if (!currentRef) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsDarkSection(true);
+          } else if (entry.boundingClientRect.top > 0) {
+            // Only reset if scrolling back up past the section
+            setIsDarkSection(false);
+          }
+        });
+      },
+      {
+        threshold: 0.1, // Trigger earlier - when only 10% is visible
+        rootMargin: '-200px 0px', // Trigger well before the section enters viewport
+      }
+    );
+
+    observer.observe(currentRef);
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
+
   // Success Page
   if (isSuccess) {
     const inviteProgress = Math.min(100, (invitedCount / REFERRAL_TARGET) * 100);
@@ -1038,232 +1071,94 @@ export function Home({ source }: { source?: string }) {
   }
 
   return (
-    <main style={{ backgroundColor: '#FFFFFF' }}>
+    <main style={{ backgroundColor: '#F2F2F2' }}>
+      <InstagramFloat />
       <JoinPopup />
       {/* Initial Landing Section - Full Screen */}
-      <section className="relative h-100svh bg-black overflow-hidden">
-        {/* Constellation Sphere Background */}
+      <section className="relative h-100svh flex items-center justify-center px-4 sm:px-6 bg-black overflow-hidden">
         <ConstellationSphere />
-        
-        {/* Top Left - THE NETWORK. */}
-        <div className="absolute top-8 left-8 z-20">
-          <h1 className="text-white font-brand text-4xl sm:text-5xl md:text-6xl font-bold" style={{ letterSpacing: '-0.02em' }}>
-            THE<br />NETWORK.
+        <div className="text-center w-full max-w-full relative z-10">
+          <h1 
+            className="font-bold mb-8 text-white font-brand text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl 2xl:text-[202px] whitespace-nowrap"
+            style={{ 
+              letterSpacing: '-0.05em'
+            }}
+          >
+            TheNetwork
           </h1>
-        </div>
-      </section>
-
-      {/* Fixed Bottom Navigation - for all sections */}
-      <nav 
-        className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none mix-blend-difference"
-      >
-        <div className="relative w-full h-28 pointer-events-auto">
-          {/* Network Icon - Positioned to cross the line */}
-          <div className="absolute bottom-8 right-8 z-20 w-16 h-16">
-            <img 
-              src="/app_icon.svg" 
-              alt="Network Icon" 
-              className="w-full h-full brightness-0 invert" 
-            />
-          </div>
-
-          {/* Horizontal Line with Gap for Icon */}
-          <div className="absolute bottom-16 left-0 right-28 z-10 px-8">
-            <div className="h-[1px] bg-white opacity-30"></div>
+          
+          <div className="mb-6">
+            <LiveCounter realCount={realCount} />
           </div>
           
-          {/* Bottom Left - TheNetwork text */}
-          <div className="absolute bottom-4 left-8 z-20">
-            <p className="text-sm font-ui text-white">TheNetwork</p>
+          <div className="mt-8">
+            <CTAButton onClick={() => setIsModalOpen(true)} isDark={false} />
           </div>
-          
-          {/* Bottom Right - Navigation Links */}
-          <div className="absolute bottom-4 right-8 z-20 flex gap-4">
-            <button onClick={() => setIsModalOpen(true)} className="text-sm font-ui text-white hover:opacity-70 transition-opacity">Join</button>
-            <button className="text-sm font-ui text-white hover:opacity-70 transition-opacity">Home</button>
-            <button className="text-sm font-ui text-white hover:opacity-70 transition-opacity">About</button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Marketing Section - White background with copy */}
-      <section 
-        className="relative min-h-screen bg-white overflow-hidden flex items-center"
-        style={{ 
-          paddingTop: '80px',
-          paddingBottom: '80px',
-          paddingLeft: '38px', 
-          paddingRight: '24px',
-        }}
-      >
-        
-        {/* Main Content */}
-        <div style={{ width: '100%' }}>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left">
-            We turn your digital DNA into a personalized <br className="hidden lg:block" />
-            feed of people, moments, and opportunities that feel <br className="hidden lg:block" />
-            unnervingly right.
-          </h2>
         </div>
       </section>
 
-      {/* Image Gallery Section - "THIS COULD BE YOU!" */}
-      <section className="relative min-h-screen bg-gray-200 overflow-hidden flex flex-col py-12 px-6">
-        {/* Image Grid */}
-        <div className="flex-1 flex items-start justify-center pt-8 pb-32">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl w-full">
-            {/* Image 1 */}
-            <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden">
-              <img 
-                src="/components/pictures/IMG_6877.jpg" 
-                alt="Community moment" 
-                className="w-full h-full object-cover"
-              />
+      {/* Scroll Content Section */}
+      <div className={`py-12 px-6 transition-all duration-700 ease-in-out ${isDarkSection ? '' : 'bg-black'}`} style={{ minHeight: !isDarkSection ? '100vh' : 'auto' }}>
+        {/* Hero Section */}
+        <section 
+          ref={heroSectionRef}
+          className="max-w-4xl mx-auto text-center mb-4 py-16"
+        >
+          <h2 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-8 font-brand transition-all duration-700 ease-in-out ${isDarkSection ? 'text-black' : 'text-white'} leading-normal sm:leading-tight md:leading-tight`}>
+            <div className="flex flex-wrap items-baseline justify-center gap-2 mb-1 sm:mb-0 text-center no-ligatures">
+              <span className="whitespace-nowrap">Meet</span>
+              <div className="flex items-baseline justify-center gap-2">
+                <span>the</span>
+                <AnimatedWord isDark={isDarkSection} />
+                <span>your</span>
+              </div>
             </div>
-            
-            {/* Image 2 */}
-            <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden">
-              <img 
-                src="/components/pictures/IMG_6886.jpg" 
-                alt="Community moment" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            
-            {/* Image 3 */}
-            <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden">
-              <img 
-                src="/components/pictures/IMG_2097.JPG" 
-                alt="Community moment" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-        
-        {/* Large Text */}
-        <div className="absolute bottom-24 left-6 right-6 md:left-12 md:right-12">
-          <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-black leading-none tracking-tight">
-            THIS COULD BE YOU!
-          </h2>
-        </div>
-      </section>
-
-      {/* Signal Intelligence Section */}
-      <section 
-        className="relative min-h-screen bg-white overflow-hidden flex items-start"
-        style={{ 
-          paddingTop: '120px',
-          paddingBottom: '80px',
-          paddingLeft: '38px', 
-          paddingRight: '24px',
-        }}
-      >
-        {/* Content */}
-        <div style={{ maxWidth: '1108px', width: '100%' }}>
-          <h2 className="text-4xl sm:text-5xl md:text-8xl font-bold text-black mb-24 leading-tight whitespace-normal md:whitespace-nowrap">
-            WE RUN ON <span className="border-b-[3px] border-black pb-2">SIGNAL INTELLIGENCE.</span>
+            <div className="whitespace-nowrap mb-1 sm:mb-0"><AnimatedGradientText text="algorithm already knows" isDark={isDarkSection} /></div>
+            <div className="whitespace-nowrap">you'll love</div>
           </h2>
           
-          <div className="max-w-2xl mb-8 space-y-6">
-            <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-              Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
-            </p>
-            <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-              This enables accurate discovery today — and lays the foundation for what comes next.
-            </p>
+          <RotatingInfo isDark={!isDarkSection} />
+        </section>
+
+      {/* Credibility Badges */}
+      <section className="max-w-4xl mx-auto text-center mb-12" style={{ marginTop: '-77px' }}>
+        <p className={`text-sm transition-all duration-700 ease-in-out ${isDarkSection ? 'text-gray-600' : 'text-gray-300'} mb-4`}>Built by ex-Google, Coinbase, Meta, & Ivies.</p>
+      </section>
+
+      {/* Catchline Section */}
+      <section className="max-w-4xl mx-auto text-center mb-16">
+        <h2 className={`text-4xl md:text-5xl font-bold mb-6 font-brand transition-all duration-700 ease-in-out ${isDarkSection ? 'text-black' : 'text-white'}`}>
+          Join the network before it becomes <span className="italic">The Network</span>
+        </h2>
+      </section>
+
+      {/* Testimonials */}
+      {/* <section className="max-w-4xl mx-auto mb-16">
+        <h3 className={`text-2xl font-bold text-center mb-8 transition-all duration-700 ease-in-out ${isDarkSection ? 'text-black' : 'text-white'}`}>What Early Adopters Say</h3>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className={`p-6 rounded-lg shadow-md transition-all duration-700 ease-in-out ${isDarkSection ? 'bg-white' : 'bg-gray-900 border border-gray-800'}`}>
+            <p className={`italic mb-4 transition-all duration-700 ease-in-out ${isDarkSection ? 'text-gray-700' : 'text-gray-300'}`}>"[Placeholder testimonial text]"</p>
+            <p className={`text-sm font-semibold transition-all duration-700 ease-in-out ${isDarkSection ? 'text-black' : 'text-white'}`}>- Testimonial Author</p>
           </div>
-          
-          <button className="px-8 py-3 bg-black text-white rounded-full text-lg font-bold hover:bg-gray-800 transition-colors">
-            Learn more
-          </button>
-        </div>
-      </section>
-
-      {/* Join Us Section */}
-      <section className="relative min-h-screen bg-white overflow-hidden flex items-center justify-center py-20 px-6">
-        {/* Content */}
-        <div className="text-center">
-          <h2 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-black mb-12 leading-none">
-            JOIN US
-          </h2>
-          
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="px-10 py-5 bg-black text-white rounded-full text-xl font-semibold hover:bg-gray-800 transition-colors"
-          >
-            Connect to TheNetwork
-          </button>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="bg-white py-12 mt-8 border-b border-black/20">
-        <div className="px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-black whitespace-nowrap mb-3">Our Features</h2>
-          <div className="border-b border-black/60 mb-6"></div>
-          
-          <div className="flex flex-wrap gap-10 text-sm text-black leading-tight">
-            {/* TheNetwork */}
-            <div className="min-w-[150px] space-y-1">
-              <p className="font-bold">TheNetwork</p>
-              <p>Your world revealed.</p>
-              <p>Meaning from signals.</p>
-              <p>Identity, understood.</p>
-            </div>
-            
-            {/* Digital DNA */}
-            <div className="min-w-[150px] space-y-1">
-              <p className="font-bold">Digital DNA</p>
-              <p>Who you are.</p>
-              <p>How you change.</p>
-              <p>All in one place.</p>
-            </div>
-            
-            {/* Feed 1 */}
-            <div className="min-w-[150px] space-y-1">
-              <p className="font-bold">Feed 1</p>
-              <p>Real affinity.</p>
-              <p>Effortless chemistry.</p>
-              <p>No swipes needed.</p>
-            </div>
-            
-            {/* Feed 2 */}
-            <div className="min-w-[150px] space-y-1">
-              <p className="font-bold">Feed 2</p>
-              <p>Right place.</p>
-              <p>Right people.</p>
-              <p>Right moment.</p>
-            </div>
-            
-            {/* Gaia */}
-            <div className="min-w-[150px] space-y-1">
-              <p className="font-bold">Gaia</p>
-              <p>Learns you deeply.</p>
-              <p>Thinks with you.</p>
-              <p>Moves life forward.</p>
-            </div>
+          <div className={`p-6 rounded-lg shadow-md transition-all duration-700 ease-in-out ${isDarkSection ? 'bg-white' : 'bg-gray-900 border border-gray-800'}`}>
+            <p className={`italic mb-4 transition-all duration-700 ease-in-out ${isDarkSection ? 'text-gray-700' : 'text-gray-300'}`}>"[Placeholder testimonial text]"</p>
+            <p className={`text-sm font-semibold transition-all duration-700 ease-in-out ${isDarkSection ? 'text-black' : 'text-white'}`}>- Testimonial Author</p>
+          </div>
+          <div className={`p-6 rounded-lg shadow-md transition-all duration-700 ease-in-out ${isDarkSection ? 'bg-white' : 'bg-gray-900 border border-gray-800'}`}>
+            <p className={`italic mb-4 transition-all duration-700 ease-in-out ${isDarkSection ? 'text-gray-700' : 'text-gray-300'}`}>"[Placeholder testimonial text]"</p>
+            <p className={`text-sm font-semibold transition-all duration-700 ease-in-out ${isDarkSection ? 'text-black' : 'text-white'}`}>- Testimonial Author</p>
           </div>
         </div>
-        <div className="px-6 mt-20 pb-40">
-          <a
-            href="https://instagram.com/join.thenetwork/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex text-black hover:opacity-70 transition-opacity"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-6 h-6"
-            >
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-          </a>
-        </div>
-      </section>
+      </section> */}
 
+      {/* Final CTA Section */}
+      <section className="max-w-4xl mx-auto text-center">
+        <p className={`text-xl mb-6 transition-all duration-700 ease-in-out ${isDarkSection ? 'text-gray-700' : 'text-gray-200'}`}>
+          Don't miss out on being part of the future. Join now.
+        </p>
+        <CTAButton onClick={() => setIsModalOpen(true)} isDark={isDarkSection} />
+      </section>
+      </div>
 
       {/* Form Modal */}
       <FormModal
