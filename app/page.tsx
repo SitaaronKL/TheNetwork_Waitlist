@@ -152,6 +152,16 @@ const CITY_SUGGESTIONS: CitySuggestion[] = [
 const SUGGESTION_LIMIT = 8;
 const MIN_LOCATION_CHARS = 2;
 
+const COMMUNITY_IMAGES = [
+  '/Community Images/1.png',
+  '/Community Images/2.png',
+  '/Community Images/3.png',
+  '/Community Images/46453c202eca84241474bc57055aad3d.jpeg',
+  '/Community Images/839acc6269cd3937057864303f84d87e.jpeg',
+  '/Community Images/89da90158f96d252627fb061a5502f46.jpeg',
+  '/Community Images/b5e87c57a5bfe48c5f712da2782fdad3.jpeg',
+];
+
 // Live Counter Component
 function LiveCounter({ realCount }: { realCount: number }) {
   const STORAGE_KEY = 'waitlistDisplayCount';
@@ -703,6 +713,7 @@ export function Home({ source }: { source?: string }) {
   const transitionSectionRef = useRef<HTMLElement>(null);
   const gallerySectionRef = useRef<HTMLElement>(null);
   const [galleryVisible, setGalleryVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const updateLocationSuggestions = useCallback((query: string) => {
     const trimmed = query.trim().toLowerCase();
@@ -755,6 +766,16 @@ export function Home({ source }: { source?: string }) {
     setIsSuccess(true);
     setIsModalOpen(false);
   }, [formData.email, realCount]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -985,6 +1006,12 @@ export function Home({ source }: { source?: string }) {
     }
   }, []);
 
+  const signalHeading = (
+    <>
+      WE RUN ON <span className="border-b-[3px] border-black pb-2 inline-block sm:inline">SIGNAL INTELLIGENCE.</span>
+    </>
+  );
+
   // Success Page
   if (isSuccess) {
     const inviteProgress = Math.min(100, (invitedCount / REFERRAL_TARGET) * 100);
@@ -1166,6 +1193,8 @@ export function Home({ source }: { source?: string }) {
 
   // Gallery section visibility observer and scroll handler
   useEffect(() => {
+    if (isMobile) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -1226,7 +1255,7 @@ export function Home({ source }: { source?: string }) {
       }
       window.removeEventListener('scroll', handleGalleryScroll);
     };
-  }, [galleryVisible]);
+  }, [galleryVisible, isMobile]);
 
   return (
     <main style={{ backgroundColor: '#FFFFFF', paddingBottom: '80px' }}>
@@ -1391,111 +1420,69 @@ export function Home({ source }: { source?: string }) {
       </section>
 
       {/* Combined Section - Text, Images, and Horizontal Scroll Transition */}
-      <section ref={gallerySectionRef} className="relative bg-white overflow-hidden" style={{ minHeight: '200vh' }}>
-        <div className="sticky top-0 min-h-screen flex flex-col justify-between py-12 px-6 md:px-12 overflow-hidden" style={{ paddingTop: '80px', paddingBottom: '30px' }}>
-          {/* Top Heading Text - Always visible */}
-          <div className="w-full mb-6">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left max-w-7xl">
-              We turn your digital DNA into a personalized <br className="hidden lg:block" />
-              feed of people, moments, and opportunities that feel unnervingly right.
-            </h2>
-          </div>
+      {!isMobile ? (
+        <section ref={gallerySectionRef} className="relative bg-white overflow-hidden" style={{ minHeight: '200vh' }}>
+          <div className="sticky top-0 min-h-screen flex flex-col justify-between py-12 px-6 md:px-12 overflow-hidden" style={{ paddingTop: '80px', paddingBottom: '30px' }}>
+            {/* Top Heading Text - Always visible */}
+            <div className="w-full mb-6">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left max-w-7xl">
+                We turn your digital DNA into a personalized <br className="hidden lg:block" />
+                feed of people, moments, and opportunities that feel unnervingly right.
+              </h2>
+            </div>
 
-          {/* Horizontal Scrolling Images Container */}
-          <div className="flex-1 flex items-center w-full overflow-hidden">
-            <div className="gallery-scroll-container flex items-center gap-6" style={{ transform: 'translateX(0)' }}>
-              {/* Image 1 */}
-              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
-                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
-                  <img 
-                    src="/Community Images/1.png" 
-                    alt="Community moment" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+            {/* Horizontal Scrolling Images Container */}
+            <div className="flex-1 flex items-center w-full overflow-hidden">
+              <div className="gallery-scroll-container flex items-center gap-6" style={{ transform: 'translateX(0)' }}>
+                {COMMUNITY_IMAGES.map((src) => (
+                  <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }} key={src}>
+                    <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
+                      <img 
+                        src={src} 
+                        alt="Community moment" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-              
-              {/* Image 2 */}
-              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
-                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
-                  <img 
-                    src="/Community Images/2.png" 
-                    alt="Community moment" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              
-              {/* Image 3 */}
-              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
-                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
-                  <img 
-                    src="/Community Images/3.png" 
-                    alt="Community moment" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              
-              {/* Image 4 */}
-              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
-                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
-                  <img 
-                    src="/Community Images/46453c202eca84241474bc57055aad3d.jpeg" 
-                    alt="Community moment" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              
-              {/* Image 5 */}
-              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
-                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
-                  <img 
-                    src="/Community Images/839acc6269cd3937057864303f84d87e.jpeg" 
-                    alt="Community moment" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              
-              {/* Image 6 */}
-              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
-                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
-                  <img 
-                    src="/Community Images/89da90158f96d252627fb061a5502f46.jpeg" 
-                    alt="Community moment" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              
-              {/* Image 7 */}
-              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
-                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
-                  <img 
-                    src="/Community Images/b5e87c57a5bfe48c5f712da2782fdad3.jpeg" 
-                    alt="Community moment" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+            </div>
+            
+            {/* Bottom Scrolling Text - "THIS COULD BE YOU!" repeating */}
+            <div className="w-full overflow-hidden mt-8">
+              <div className="gallery-text-container flex items-center gap-12" style={{ transform: 'translateX(0)', whiteSpace: 'nowrap' }}>
+                <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-black leading-none tracking-tight inline-block" style={{ fontSize: 'clamp(3.2rem, 9.6vw, 9.6rem)' }}>
+                  THIS COULD BE YOU!
+                </h2>
+                <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-black leading-none tracking-tight inline-block" style={{ fontSize: 'clamp(3.2rem, 9.6vw, 9.6rem)' }}>
+                  THIS COULD BE YOU!
+                </h2>
               </div>
             </div>
           </div>
-          
-          {/* Bottom Scrolling Text - "THIS COULD BE YOU!" repeating */}
-          <div className="w-full overflow-hidden mt-8">
-            <div className="gallery-text-container flex items-center gap-12" style={{ transform: 'translateX(0)', whiteSpace: 'nowrap' }}>
-              <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-black leading-none tracking-tight inline-block" style={{ fontSize: 'clamp(3.2rem, 9.6vw, 9.6rem)' }}>
-                THIS COULD BE YOU!
-              </h2>
-              <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-black leading-none tracking-tight inline-block" style={{ fontSize: 'clamp(3.2rem, 9.6vw, 9.6rem)' }}>
-                THIS COULD BE YOU!
-              </h2>
+        </section>
+      ) : (
+        <section ref={gallerySectionRef} className="bg-white px-6 py-10 space-y-8">
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold text-black leading-tight">{signalHeading}</h2>
+            <div className="space-y-4 text-lg text-black leading-relaxed">
+              <p>
+                Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
+              </p>
+              <p>
+                This enables accurate discovery today — and lays the foundation for what comes next.
+              </p>
             </div>
           </div>
-        </div>
-      </section>
+          <div className="space-y-6">
+            {COMMUNITY_IMAGES.map((src) => (
+              <div key={`mobile-${src}`} className="rounded-3xl overflow-hidden">
+                <img src={src} alt="Community moment" className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Signal Intelligence Section */}
       <section 
@@ -1527,7 +1514,7 @@ export function Home({ source }: { source?: string }) {
                 fontSize: 'clamp(1.5rem, 5vw, 9rem)',
               }}
             >
-              WE RUN ON <span className="border-b-[3px] border-black pb-2">SIGNAL INTELLIGENCE.</span>
+              {signalHeading}
             </h2>
             
             <div className="max-w-2xl mb-8 space-y-6">
