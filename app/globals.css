@@ -1093,3 +1093,15 @@ section.bg-black ::-moz-selection {
     background-size: 40px 40px;
   }
 }
+
+/* Staircase slide-up animation for images */
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

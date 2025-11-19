@@ -701,6 +701,8 @@ export function Home({ source }: { source?: string }) {
   const invitePulseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasInvitePulseMountedRef = useRef(false);
   const transitionSectionRef = useRef<HTMLElement>(null);
+  const gallerySectionRef = useRef<HTMLElement>(null);
+  const [galleryVisible, setGalleryVisible] = useState(false);
 
   const updateLocationSuggestions = useCallback((query: string) => {
     const trimmed = query.trim().toLowerCase();
@@ -1162,6 +1164,30 @@ export function Home({ source }: { source?: string }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Gallery section visibility observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !galleryVisible) {
+            setGalleryVisible(true);
+          }
+        });
+      },
+      { threshold: 0.5 } // Trigger when 50% of the section is visible
+    );
+
+    if (gallerySectionRef.current) {
+      observer.observe(gallerySectionRef.current);
+    }
+
+    return () => {
+      if (gallerySectionRef.current) {
+        observer.unobserve(gallerySectionRef.current);
+      }
+    };
+  }, [galleryVisible]);
+
   return (
     <main style={{ backgroundColor: '#FFFFFF' }}>
       <JoinPopup />
@@ -1205,8 +1231,23 @@ export function Home({ source }: { source?: string }) {
           {/* Bottom Right - Navigation Links */}
           <div className="absolute bottom-4 right-8 z-20 flex gap-4">
             <button onClick={() => setIsModalOpen(true)} className="text-sm font-ui text-white hover:opacity-70 transition-opacity">Join</button>
-            <button className="text-sm font-ui text-white hover:opacity-70 transition-opacity">Home</button>
-            <button className="text-sm font-ui text-white hover:opacity-70 transition-opacity">About</button>
+            <button 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+              className="text-sm font-ui text-white hover:opacity-70 transition-opacity"
+            >
+              Home
+            </button>
+            <button 
+              onClick={() => {
+                const signalSection = document.getElementById('signal-intelligence');
+                if (signalSection) {
+                  signalSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="text-sm font-ui text-white hover:opacity-70 transition-opacity"
+            >
+              About
+            </button>
           </div>
         </div>
       </nav>
@@ -1329,12 +1370,19 @@ export function Home({ source }: { source?: string }) {
       </section>
 
       {/* Image Gallery Section - "THIS COULD BE YOU!" */}
-      <section className="relative min-h-screen bg-gray-200 overflow-hidden flex flex-col py-12 px-6">
+      <section ref={gallerySectionRef} className="relative min-h-screen bg-gray-200 overflow-hidden flex flex-col py-12 px-6">
         {/* Image Grid */}
         <div className="flex-1 flex items-start justify-center pt-8 pb-40 md:pb-48">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl w-full" style={{ maxWidth: '63rem' }}>
             {/* Image 1 */}
-            <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden">
+            <div 
+              className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden"
+              style={{
+                opacity: 0,
+                transform: 'translateY(60px)',
+                animation: galleryVisible ? 'slideUpFade 1.2s ease-out 0.3s forwards' : 'none'
+              }}
+            >
               <img 
                 src="/1-community.jpeg" 
                 alt="Community moment" 
@@ -1343,7 +1391,14 @@ export function Home({ source }: { source?: string }) {
             </div>
             
             {/* Image 2 */}
-            <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden">
+            <div 
+              className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden"
+              style={{
+                opacity: 0,
+                transform: 'translateY(60px)',
+                animation: galleryVisible ? 'slideUpFade 1.2s ease-out 0.7s forwards' : 'none'
+              }}
+            >
               <img 
                 src="/2-community46453c202eca84241474bc57055aad3d.jpeg" 
                 alt="Community moment" 
@@ -1352,7 +1407,14 @@ export function Home({ source }: { source?: string }) {
             </div>
             
             {/* Image 3 */}
-            <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden">
+            <div 
+              className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden"
+              style={{
+                opacity: 0,
+                transform: 'translateY(60px)',
+                animation: galleryVisible ? 'slideUpFade 1.2s ease-out 1.1s forwards' : 'none'
+              }}
+            >
               <img 
                 src="/3-community.jpeg" 
                 alt="Community moment" 
@@ -1372,6 +1434,7 @@ export function Home({ source }: { source?: string }) {
 
       {/* Signal Intelligence Section */}
       <section 
+        id="signal-intelligence"
         className="relative min-h-screen bg-white overflow-hidden flex items-start"
         style={{ 
           paddingTop: '120px',
@@ -1402,9 +1465,9 @@ export function Home({ source }: { source?: string }) {
             </p>
           </div>
           
-          <button className="px-8 py-3 bg-black text-white rounded-full text-lg font-bold hover:bg-gray-800 transition-colors">
+          {/* <button className="px-8 py-3 bg-black text-white rounded-full text-lg font-bold hover:bg-gray-800 transition-colors">
             Learn more
-          </button>
+          </button> */}
         </div>
       </section>
 
