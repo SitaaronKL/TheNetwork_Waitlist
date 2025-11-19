@@ -1393,9 +1393,10 @@ export function Home({ source }: { source?: string }) {
           <div className="sticky top-0 min-h-screen flex flex-col justify-between py-12 px-6 md:px-12 overflow-hidden" style={{ paddingTop: '80px', paddingBottom: '30px' }}>
             {/* Top Heading Text - Always visible */}
             <div className="w-full mb-6">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left max-w-7xl md:whitespace-nowrap">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left max-w-7xl">
                 We turn your digital DNA into a personalized <br className="hidden lg:block" />
-                feed of people, moments, and opportunities that feel unnervingly right.
+                feed of people, moments, and opportunities  <br className="hidden lg:block" />
+                that feel unnervingly right.
               </h2>
             </div>
 
@@ -1448,7 +1449,7 @@ export function Home({ source }: { source?: string }) {
         <h2 className="text-4xl font-bold text-black">THIS COULD BE YOU!</h2>
       </section>
 
-      {/* Signal Intelligence Section */}
+      {/* Signal Intelligence Section - Desktop */}
       <section 
         id="signal-intelligence"
         className="relative bg-white overflow-hidden flex items-start hidden md:flex"
@@ -1489,6 +1490,8 @@ export function Home({ source }: { source?: string }) {
           </div>
         </div>
       </section>
+
+      {/* Signal Intelligence Section - Mobile */}
       <section 
         className="bg-white px-6 py-12 space-y-8 md:hidden"
         style={{ marginTop: '0' }}
