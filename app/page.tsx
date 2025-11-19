@@ -713,7 +713,10 @@ export function Home({ source }: { source?: string }) {
   const transitionSectionRef = useRef<HTMLElement>(null);
   const gallerySectionRef = useRef<HTMLElement>(null);
   const [galleryVisible, setGalleryVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth <= 768;
+  });
 
   const updateLocationSuggestions = useCallback((query: string) => {
     const trimmed = query.trim().toLowerCase();
@@ -1425,7 +1428,7 @@ export function Home({ source }: { source?: string }) {
           <div className="sticky top-0 min-h-screen flex flex-col justify-between py-12 px-6 md:px-12 overflow-hidden" style={{ paddingTop: '80px', paddingBottom: '30px' }}>
             {/* Top Heading Text - Always visible */}
             <div className="w-full mb-6">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left max-w-7xl">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left max-w-7xl md:whitespace-nowrap">
                 We turn your digital DNA into a personalized <br className="hidden lg:block" />
                 feed of people, moments, and opportunities that feel unnervingly right.
               </h2>
@@ -1485,53 +1488,73 @@ export function Home({ source }: { source?: string }) {
       )}
 
       {/* Signal Intelligence Section */}
-      <section 
-        id="signal-intelligence"
-        className="relative bg-white overflow-hidden flex items-start"
-        style={{ 
-          minHeight: '120vh',
-          zIndex: 10,
-          marginTop: '-30vh',
-        }}
-      >
-        <div 
-          className="sticky top-0 bg-white z-20 flex items-start w-full"
-          style={{
-            minHeight: '100vh',
-            paddingTop: '90px',
-            paddingBottom: '10px',
-            paddingLeft: '38px',
-            paddingRight: '38px',
+      {!isMobile ? (
+        <section 
+          id="signal-intelligence"
+          className="relative bg-white overflow-hidden flex items-start"
+          style={{ 
+            minHeight: '120vh',
+            zIndex: 10,
+            marginTop: '-30vh',
           }}
         >
-          {/* Content */}
-          <div style={{ width: '100%' }}>
-            <h2
-              className="font-bold text-black mb-24 leading-none whitespace-nowrap"
-              style={{
-                // Scale with viewport so it stays one line across the top (desktop/tablet),
-                // while still readable on smaller screens.
-                fontSize: 'clamp(1.5rem, 5vw, 9rem)',
-              }}
-            >
+          <div 
+            className="sticky top-0 bg-white z-20 flex items-start w-full"
+            style={{
+              minHeight: '100vh',
+              paddingTop: '90px',
+              paddingBottom: '10px',
+              paddingLeft: '38px',
+              paddingRight: '38px',
+            }}
+          >
+            {/* Content */}
+            <div style={{ width: '100%' }}>
+              <h2
+                className="font-bold text-black mb-24 leading-none md:whitespace-nowrap"
+                style={{
+                  // Scale with viewport so it stays one line across the top (desktop/tablet),
+                  // while still readable on smaller screens.
+                  fontSize: 'clamp(1.5rem, 5vw, 9rem)',
+                }}
+              >
+                {signalHeading}
+              </h2>
+              
+              <div className="max-w-2xl mb-8 space-y-6">
+                <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
+                  Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
+                </p>
+                <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
+                  This enables accurate discovery today — and lays the foundation for what comes next.
+                </p>
+              </div>
+              
+              {/* <button className="px-8 py-3 bg-black text-white rounded-full text-lg font-bold hover:bg-gray-800 transition-colors">
+                Learn more
+              </button> */}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section 
+          id="signal-intelligence"
+          className="bg-white px-6 py-12 space-y-8"
+          style={{ marginTop: '-20px' }}
+        >
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold text-black leading-tight">
               {signalHeading}
             </h2>
-            
-            <div className="max-w-2xl mb-8 space-y-6">
-              <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-                Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
-              </p>
-              <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-                This enables accurate discovery today — and lays the foundation for what comes next.
-              </p>
-            </div>
-            
-            {/* <button className="px-8 py-3 bg-black text-white rounded-full text-lg font-bold hover:bg-gray-800 transition-colors">
-              Learn more
-            </button> */}
+            <p className="text-lg text-black leading-relaxed">
+              Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
+            </p>
+            <p className="text-lg text-black leading-relaxed">
+              This enables accurate discovery today — and lays the foundation for what comes next.
+            </p>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Join Us Section */}
       <section
