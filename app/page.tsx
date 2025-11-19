@@ -1278,7 +1278,7 @@ export function Home({ source }: { source?: string }) {
 
       {/* Fixed Bottom Navigation - for all sections */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none mix-blend-difference"
+        className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none mix-blend-normal md:mix-blend-difference"
       >
         <div className="relative w-full h-28 pointer-events-auto">
           {/* Network Icon - Positioned to cross the line */}
@@ -1286,26 +1286,26 @@ export function Home({ source }: { source?: string }) {
             <img 
               src="/app_icon.svg" 
               alt="Network Icon" 
-              className="w-full h-full brightness-0 invert" 
+              className="w-full h-full text-black md:brightness-0 md:invert" 
             />
           </div>
 
           {/* Horizontal Line with Gap for Icon */}
           <div className="absolute bottom-16 left-0 right-28 z-10 px-8">
-            <div className="h-[1px] bg-white opacity-30"></div>
+            <div className="h-[1px] bg-black md:bg-white opacity-70 md:opacity-30"></div>
           </div>
           
           {/* Bottom Left - TheNetwork text */}
           <div className="absolute bottom-4 left-8 z-20">
-            <p className="text-sm font-ui text-white">TheNetwork</p>
+            <p className="text-sm font-ui text-black md:text-white">TheNetwork</p>
           </div>
           
           {/* Bottom Right - Navigation Links */}
           <div className="absolute bottom-4 right-8 z-20 flex gap-4">
-            <button onClick={() => setIsModalOpen(true)} className="text-sm font-ui text-white hover:opacity-70 transition-opacity">Join</button>
+            <button onClick={() => setIsModalOpen(true)} className="text-sm font-ui text-black md:text-white hover:opacity-70 transition-opacity">Join</button>
             <button 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-              className="text-sm font-ui text-white hover:opacity-70 transition-opacity"
+              className="text-sm font-ui text-black md:text-white hover:opacity-70 transition-opacity"
             >
               Home
             </button>
@@ -1316,7 +1316,7 @@ export function Home({ source }: { source?: string }) {
                   signalSection.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="text-sm font-ui text-white hover:opacity-70 transition-opacity"
+              className="text-sm font-ui text-black md:text-white hover:opacity-70 transition-opacity"
             >
               About
             </button>
@@ -1466,24 +1466,25 @@ export function Home({ source }: { source?: string }) {
         </section>
       ) : (
         <section ref={gallerySectionRef} className="bg-white px-6 py-10 space-y-8">
-          <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-black leading-tight">{signalHeading}</h2>
-            <div className="space-y-4 text-lg text-black leading-relaxed">
-              <p>
-                Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
-              </p>
-              <p>
-                This enables accurate discovery today — and lays the foundation for what comes next.
-              </p>
-            </div>
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold text-black leading-tight">
+              We turn your digital DNA into a personalized feed of people, moments, and opportunities that feel unnervingly right.
+            </h2>
+            <p className="text-base text-black leading-relaxed">
+              Scroll sideways through the moments our community is living right now.
+            </p>
           </div>
-          <div className="space-y-6">
+          <div className="overflow-x-auto flex gap-4 snap-x snap-mandatory pb-2">
             {COMMUNITY_IMAGES.map((src) => (
-              <div key={`mobile-${src}`} className="rounded-3xl overflow-hidden">
+              <div 
+                key={`mobile-${src}`} 
+                className="rounded-3xl overflow-hidden snap-start min-w-[260px]"
+              >
                 <img src={src} alt="Community moment" className="w-full h-full object-cover" />
               </div>
             ))}
           </div>
+          <h2 className="text-4xl font-bold text-black">THIS COULD BE YOU!</h2>
         </section>
       )}
 
@@ -1540,7 +1541,7 @@ export function Home({ source }: { source?: string }) {
         <section 
           id="signal-intelligence"
           className="bg-white px-6 py-12 space-y-8"
-          style={{ marginTop: '-20px' }}
+          style={{ marginTop: '0' }}
         >
           <div className="space-y-4">
             <h2 className="text-3xl font-bold text-black leading-tight">
