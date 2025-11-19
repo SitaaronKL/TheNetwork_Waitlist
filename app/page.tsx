@@ -1256,8 +1256,8 @@ export function Home({ source }: { source?: string }) {
             />
           </div>
 
-          {/* Horizontal Line with Gap for Icon */}
-          <div className="absolute bottom-16 left-0 right-28 z-10 px-8">
+          {/* Horizontal Line */}
+          <div className="absolute bottom-16 left-6 right-28 z-10">
             <div className="h-[1px] bg-black md:bg-white opacity-70 md:opacity-30"></div>
           </div>
           
@@ -1440,7 +1440,7 @@ export function Home({ source }: { source?: string }) {
           {COMMUNITY_IMAGES.map((src) => (
             <div 
               key={`mobile-${src}`} 
-              className="rounded-3xl overflow-hidden snap-start min-w-[260px]"
+              className="rounded-3xl overflow-hidden snap-start min-w-[260px] aspect-[4/5]"
             >
               <img src={src} alt="Community moment" className="w-full h-full object-cover" />
             </div>
@@ -1450,46 +1450,48 @@ export function Home({ source }: { source?: string }) {
       </section>
 
       {/* Signal Intelligence Section - Desktop */}
-      <section 
-        id="signal-intelligence"
-        className="relative bg-white overflow-hidden flex items-start hidden md:flex"
-        style={{ 
-          minHeight: '120vh',
-          zIndex: 10,
-          marginTop: '-30vh',
-        }}
-      >
-        <div 
-          className="sticky top-0 bg-white z-20 flex items-start w-full"
-          style={{
-            minHeight: '100vh',
-            paddingTop: '90px',
-            paddingBottom: '10px',
-            paddingLeft: '38px',
-            paddingRight: '38px',
+      <div className="hidden md:block">
+        <section 
+          id="signal-intelligence"
+          className="relative bg-white overflow-hidden flex items-start"
+          style={{ 
+            minHeight: '120vh',
+            zIndex: 10,
+            marginTop: '-30vh',
           }}
         >
-          <div style={{ width: '100%' }}>
-            <h2
-              className="font-bold text-black mb-24 leading-none md:whitespace-nowrap"
-              style={{
-                fontSize: 'clamp(1.5rem, 5vw, 9rem)',
-              }}
-            >
-              {signalHeading}
-            </h2>
-            
-            <div className="max-w-2xl mb-8 space-y-6">
-              <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-                Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
-              </p>
-              <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-                This enables accurate discovery today — and lays the foundation for what comes next.
-              </p>
+          <div 
+            className="sticky top-0 bg-white z-20 flex items-start w-full"
+            style={{
+              minHeight: '100vh',
+              paddingTop: '90px',
+              paddingBottom: '10px',
+              paddingLeft: '38px',
+              paddingRight: '38px',
+            }}
+          >
+            <div style={{ width: '100%' }}>
+              <h2
+                className="font-bold text-black mb-24 leading-none whitespace-nowrap"
+                style={{
+                  fontSize: 'clamp(1.5rem, 5vw, 9rem)',
+                }}
+              >
+                {signalHeading}
+              </h2>
+              
+              <div className="max-w-2xl mb-8 space-y-6">
+                <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
+                  Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
+                </p>
+                <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
+                  This enables accurate discovery today — and lays the foundation for what comes next.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Signal Intelligence Section - Mobile */}
       <section 
@@ -1532,7 +1534,27 @@ export function Home({ source }: { source?: string }) {
       {/* Features Section */}
       <section className="relative bg-white py-6 z-30">
         <div className="px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-black whitespace-nowrap mb-3">Our Features</h2>
+          <div className="flex justify-between items-end mb-3">
+            <h2 className="text-2xl sm:text-3xl font-bold text-black whitespace-nowrap">Our Features</h2>
+            <div className="flex gap-6 text-2xl sm:text-3xl font-bold text-black whitespace-nowrap">
+              <a
+                href="https://instagram.com/join.thenetwork/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-70 transition-opacity"
+              >
+                Instagram
+              </a>
+              <a
+                href="https://www.linkedin.com/company/the-network-life/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-70 transition-opacity"
+              >
+                LinkedIn
+              </a>
+            </div>
+          </div>
           <div className="border-b border-black/60 mb-6"></div>
           
           <div className="flex flex-wrap gap-10 text-sm text-black leading-tight items-start">
@@ -1574,24 +1596,6 @@ export function Home({ source }: { source?: string }) {
               <p>Learns you deeply.</p>
               <p>Thinks with you.</p>
               <p>Moves life forward.</p>
-            </div>
-            <div className="min-w-[150px] space-y-1 font-bold text-black">
-              <a
-                href="https://instagram.com/join.thenetwork/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:opacity-70 transition-opacity block"
-              >
-                Instagram
-              </a>
-              <a
-                href="https://www.linkedin.com/company/the-network-life/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:opacity-70 transition-opacity block"
-              >
-                LinkedIn
-              </a>
             </div>
           </div>
         </div>
