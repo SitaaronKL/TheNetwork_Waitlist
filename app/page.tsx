@@ -1470,9 +1470,6 @@ export function Home({ source }: { source?: string }) {
             <h2 className="text-3xl font-bold text-black leading-tight">
               We turn your digital DNA into a personalized feed of people, moments, and opportunities that feel unnervingly right.
             </h2>
-            <p className="text-base text-black leading-relaxed">
-              Scroll sideways through the moments our community is living right now.
-            </p>
           </div>
           <div className="overflow-x-auto flex gap-4 snap-x snap-mandatory pb-2">
             {COMMUNITY_IMAGES.map((src) => (
