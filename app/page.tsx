@@ -1194,18 +1194,26 @@ export function Home({ source }: { source?: string }) {
       // Only start when section reaches top of viewport
       const scrollProgress = Math.max(0, Math.min(1, -rect.top / (sectionHeight - windowHeight)));
 
-      // Find the scroll containers and background element
+      // Find the scroll containers
       const scrollContainer = section.querySelector('.gallery-scroll-container') as HTMLElement;
       const textContainer = section.querySelector('.gallery-text-container') as HTMLElement;
-      const bgElement = section.querySelector('.gallery-bg') as HTMLElement;
 
       if (scrollContainer && textContainer) {
-        // Start horizontal scrolling immediately when section is locked
-        const maxScroll = scrollContainer.scrollWidth - window.innerWidth;
-        const horizontalOffset = scrollProgress * maxScroll * 1.8; // Scroll through all images
-        
-        scrollContainer.style.transform = `translateX(-${horizontalOffset}px)`;
-        textContainer.style.transform = `translateX(-${horizontalOffset}px)`;
+        // Delay horizontal scrolling until 30% through the section
+        // This ensures "THIS COULD BE YOU!" is fully visible before scrolling starts
+        if (scrollProgress < 0.3) {
+          // Keep everything locked in place
+          scrollContainer.style.transform = 'translateX(0)';
+          textContainer.style.transform = 'translateX(0)';
+        } else {
+          // Start horizontal scrolling after delay
+          const adjustedProgress = (scrollProgress - 0.3) / 0.7; // Normalize to 0-1 after delay
+          const maxScroll = scrollContainer.scrollWidth - window.innerWidth;
+          const horizontalOffset = adjustedProgress * maxScroll * 1.3; // Adjusted for 2 text repetitions
+          
+          scrollContainer.style.transform = `translateX(-${horizontalOffset}px)`;
+          textContainer.style.transform = `translateX(-${horizontalOffset}px)`;
+        }
       }
     };
 
@@ -1384,9 +1392,9 @@ export function Home({ source }: { source?: string }) {
 
       {/* Combined Section - Text, Images, and Horizontal Scroll Transition */}
       <section ref={gallerySectionRef} className="relative bg-white overflow-hidden" style={{ minHeight: '200vh' }}>
-        <div className="sticky top-0 min-h-screen flex flex-col justify-between py-12 px-6 md:px-12 overflow-hidden" style={{ paddingTop: '120px', paddingBottom: '40px' }}>
+        <div className="sticky top-0 min-h-screen flex flex-col justify-between py-12 px-6 md:px-12 overflow-hidden" style={{ paddingTop: '80px', paddingBottom: '30px' }}>
           {/* Top Heading Text - Always visible */}
-          <div className="w-full mb-8">
+          <div className="w-full mb-6">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left max-w-7xl">
               We turn your digital DNA into a personalized <br className="hidden lg:block" />
               feed of people, moments, and opportunities that feel unnervingly right.
@@ -1478,16 +1486,10 @@ export function Home({ source }: { source?: string }) {
           {/* Bottom Scrolling Text - "THIS COULD BE YOU!" repeating */}
           <div className="w-full overflow-hidden mt-8">
             <div className="gallery-text-container flex items-center gap-12" style={{ transform: 'translateX(0)', whiteSpace: 'nowrap' }}>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black leading-none tracking-tight inline-block">
+              <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-black leading-none tracking-tight inline-block" style={{ fontSize: 'clamp(3.2rem, 9.6vw, 9.6rem)' }}>
                 THIS COULD BE YOU!
               </h2>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black leading-none tracking-tight inline-block">
-                THIS COULD BE YOU!
-              </h2>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black leading-none tracking-tight inline-block">
-                THIS COULD BE YOU!
-              </h2>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black leading-none tracking-tight inline-block">
+              <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-black leading-none tracking-tight inline-block" style={{ fontSize: 'clamp(3.2rem, 9.6vw, 9.6rem)' }}>
                 THIS COULD BE YOU!
               </h2>
             </div>
@@ -1498,44 +1500,54 @@ export function Home({ source }: { source?: string }) {
       {/* Signal Intelligence Section */}
       <section 
         id="signal-intelligence"
-        className="relative min-h-screen bg-white overflow-hidden flex items-start"
+        className="relative bg-white overflow-hidden flex items-start"
         style={{ 
-          paddingTop: '120px',
-          paddingBottom: '80px',
-          paddingLeft: '38px',
-          paddingRight: '38px',
+          minHeight: '160vh',
+          zIndex: 10,
+          marginTop: '-45vh',
         }}
       >
-        {/* Content */}
-        <div style={{ width: '100%' }}>
-          <h2
-            className="font-bold text-black mb-24 leading-none whitespace-nowrap"
-            style={{
-              // Scale with viewport so it stays one line across the top (desktop/tablet),
-              // while still readable on smaller screens.
-              fontSize: 'clamp(1.5rem, 5vw, 9rem)',
-            }}
-          >
-            WE RUN ON <span className="border-b-[3px] border-black pb-2">SIGNAL INTELLIGENCE.</span>
-          </h2>
-          
-          <div className="max-w-2xl mb-8 space-y-6">
-            <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-              Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
-            </p>
-            <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-              This enables accurate discovery today — and lays the foundation for what comes next.
-            </p>
+        <div 
+          className="sticky top-0 bg-white z-20 flex items-start w-full"
+          style={{
+            minHeight: '100vh',
+            paddingTop: '120px',
+            paddingBottom: '80px',
+            paddingLeft: '38px',
+            paddingRight: '38px',
+          }}
+        >
+          {/* Content */}
+          <div style={{ width: '100%' }}>
+            <h2
+              className="font-bold text-black mb-24 leading-none whitespace-nowrap"
+              style={{
+                // Scale with viewport so it stays one line across the top (desktop/tablet),
+                // while still readable on smaller screens.
+                fontSize: 'clamp(1.5rem, 5vw, 9rem)',
+              }}
+            >
+              WE RUN ON <span className="border-b-[3px] border-black pb-2">SIGNAL INTELLIGENCE.</span>
+            </h2>
+            
+            <div className="max-w-2xl mb-8 space-y-6">
+              <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
+                Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
+              </p>
+              <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
+                This enables accurate discovery today — and lays the foundation for what comes next.
+              </p>
+            </div>
+            
+            {/* <button className="px-8 py-3 bg-black text-white rounded-full text-lg font-bold hover:bg-gray-800 transition-colors">
+              Learn more
+            </button> */}
           </div>
-          
-          {/* <button className="px-8 py-3 bg-black text-white rounded-full text-lg font-bold hover:bg-gray-800 transition-colors">
-            Learn more
-          </button> */}
         </div>
       </section>
 
       {/* Join Us Section */}
-      <section className="relative min-h-screen bg-white overflow-hidden flex items-center justify-center py-20 px-6">
+      <section className="relative min-h-screen bg-white overflow-hidden flex items-center justify-center py-12 px-6">
         {/* Content */}
         <div className="text-center">
           <h2 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-black mb-12 leading-none">
