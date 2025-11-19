@@ -1164,7 +1164,7 @@ export function Home({ source }: { source?: string }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Gallery section visibility observer
+  // Gallery section visibility observer and scroll handler
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -1174,17 +1174,49 @@ export function Home({ source }: { source?: string }) {
           }
         });
       },
-      { threshold: 0.5 } // Trigger when 50% of the section is visible
+      { threshold: 0.3 } // Trigger when 30% of the section is visible
     );
 
     if (gallerySectionRef.current) {
       observer.observe(gallerySectionRef.current);
     }
 
+    // Scroll handler for horizontal scrolling and background transitions
+    const handleGalleryScroll = () => {
+      const section = gallerySectionRef.current;
+      if (!section) return;
+
+      const rect = section.getBoundingClientRect();
+      const sectionHeight = section.offsetHeight;
+      const windowHeight = window.innerHeight;
+      
+      // Calculate scroll progress through the section (0 to 1)
+      // Only start when section reaches top of viewport
+      const scrollProgress = Math.max(0, Math.min(1, -rect.top / (sectionHeight - windowHeight)));
+
+      // Find the scroll containers and background element
+      const scrollContainer = section.querySelector('.gallery-scroll-container') as HTMLElement;
+      const textContainer = section.querySelector('.gallery-text-container') as HTMLElement;
+      const bgElement = section.querySelector('.gallery-bg') as HTMLElement;
+
+      if (scrollContainer && textContainer) {
+        // Start horizontal scrolling immediately when section is locked
+        const maxScroll = scrollContainer.scrollWidth - window.innerWidth;
+        const horizontalOffset = scrollProgress * maxScroll * 1.8; // Scroll through all images
+        
+        scrollContainer.style.transform = `translateX(-${horizontalOffset}px)`;
+        textContainer.style.transform = `translateX(-${horizontalOffset}px)`;
+      }
+    };
+
+    window.addEventListener('scroll', handleGalleryScroll);
+    handleGalleryScroll(); // Initial check
+
     return () => {
       if (gallerySectionRef.current) {
         observer.unobserve(gallerySectionRef.current);
       }
+      window.removeEventListener('scroll', handleGalleryScroll);
     };
   }, [galleryVisible]);
 
@@ -1350,85 +1382,116 @@ export function Home({ source }: { source?: string }) {
         />
       </section>
 
-      {/* Marketing Section - White background with copy */}
-      <section 
-        className="relative min-h-screen bg-white overflow-hidden flex items-center"
-        style={{ 
-          paddingTop: '80px',
-          paddingBottom: '80px',
-          paddingLeft: '38px', 
-          paddingRight: '24px',
-        }}
-      >
-        {/* Main Content */}
-        <div style={{ width: '100%', position: 'relative', zIndex: 10 }}>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left">
-            We turn your digital DNA into a personalized <br className="hidden lg:block" />
-            feed of people, moments, and opportunities that feel unnervingly right.
-          </h2>
-        </div>
-      </section>
+      {/* Combined Section - Text, Images, and Horizontal Scroll Transition */}
+      <section ref={gallerySectionRef} className="relative bg-white overflow-hidden" style={{ minHeight: '200vh' }}>
+        <div className="sticky top-0 min-h-screen flex flex-col justify-between py-12 px-6 md:px-12 overflow-hidden" style={{ paddingTop: '120px', paddingBottom: '40px' }}>
+          {/* Top Heading Text - Always visible */}
+          <div className="w-full mb-8">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight text-left max-w-7xl">
+              We turn your digital DNA into a personalized <br className="hidden lg:block" />
+              feed of people, moments, and opportunities that feel unnervingly right.
+            </h2>
+          </div>
 
-      {/* Image Gallery Section - "THIS COULD BE YOU!" */}
-      <section ref={gallerySectionRef} className="relative min-h-screen bg-gray-200 overflow-hidden flex flex-col py-12 px-6">
-        {/* Image Grid */}
-        <div className="flex-1 flex items-start justify-center pt-8 pb-40 md:pb-48">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl w-full" style={{ maxWidth: '63rem' }}>
-            {/* Image 1 */}
-            <div 
-              className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden"
-              style={{
-                opacity: 0,
-                transform: 'translateY(60px)',
-                animation: galleryVisible ? 'slideUpFade 1.2s ease-out 0.3s forwards' : 'none'
-              }}
-            >
-              <img 
-                src="/1-community.jpeg" 
-                alt="Community moment" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            
-            {/* Image 2 */}
-            <div 
-              className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden"
-              style={{
-                opacity: 0,
-                transform: 'translateY(60px)',
-                animation: galleryVisible ? 'slideUpFade 1.2s ease-out 0.7s forwards' : 'none'
-              }}
-            >
-              <img 
-                src="/2-community46453c202eca84241474bc57055aad3d.jpeg" 
-                alt="Community moment" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            
-            {/* Image 3 */}
-            <div 
-              className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden"
-              style={{
-                opacity: 0,
-                transform: 'translateY(60px)',
-                animation: galleryVisible ? 'slideUpFade 1.2s ease-out 1.1s forwards' : 'none'
-              }}
-            >
-              <img 
-                src="/3-community.jpeg" 
-                alt="Community moment" 
-                className="w-full h-full object-cover"
-              />
+          {/* Horizontal Scrolling Images Container */}
+          <div className="flex-1 flex items-center w-full overflow-hidden">
+            <div className="gallery-scroll-container flex items-center gap-6" style={{ transform: 'translateX(0)' }}>
+              {/* Image 1 */}
+              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
+                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
+                  <img 
+                    src="/Community Images/1.png" 
+                    alt="Community moment" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              {/* Image 2 */}
+              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
+                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
+                  <img 
+                    src="/Community Images/2.png" 
+                    alt="Community moment" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              {/* Image 3 */}
+              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
+                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
+                  <img 
+                    src="/Community Images/3.png" 
+                    alt="Community moment" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              {/* Image 4 */}
+              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
+                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
+                  <img 
+                    src="/Community Images/46453c202eca84241474bc57055aad3d.jpeg" 
+                    alt="Community moment" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              {/* Image 5 */}
+              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
+                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
+                  <img 
+                    src="/Community Images/839acc6269cd3937057864303f84d87e.jpeg" 
+                    alt="Community moment" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              {/* Image 6 */}
+              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
+                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
+                  <img 
+                    src="/Community Images/89da90158f96d252627fb061a5502f46.jpeg" 
+                    alt="Community moment" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              {/* Image 7 */}
+              <div className="flex-shrink-0" style={{ width: '350px', height: '440px' }}>
+                <div className="aspect-[4/5] bg-gray-300 rounded-2xl overflow-hidden w-full h-full">
+                  <img 
+                    src="/Community Images/b5e87c57a5bfe48c5f712da2782fdad3.jpeg" 
+                    alt="Community moment" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        
-        {/* Large Text */}
-        <div className="absolute bottom-12 left-6 right-6 md:left-12 md:right-12 md:bottom-16">
-          <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-black leading-none tracking-tight">
-            THIS COULD BE YOU!
-          </h2>
+          
+          {/* Bottom Scrolling Text - "THIS COULD BE YOU!" repeating */}
+          <div className="w-full overflow-hidden mt-8">
+            <div className="gallery-text-container flex items-center gap-12" style={{ transform: 'translateX(0)', whiteSpace: 'nowrap' }}>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black leading-none tracking-tight inline-block">
+                THIS COULD BE YOU!
+              </h2>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black leading-none tracking-tight inline-block">
+                THIS COULD BE YOU!
+              </h2>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black leading-none tracking-tight inline-block">
+                THIS COULD BE YOU!
+              </h2>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-black leading-none tracking-tight inline-block">
+                THIS COULD BE YOU!
+              </h2>
+            </div>
+          </div>
         </div>
       </section>
 
