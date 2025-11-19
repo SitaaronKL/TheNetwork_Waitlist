@@ -622,18 +622,6 @@ function FormModal({
             )}
           </div>
           
-          <div className="flex items-start">
-            <input
-              type="checkbox"
-              id="terms"
-              required
-              className="mt-1 mr-2"
-            />
-            <label htmlFor="terms" className="text-sm text-gray-700">
-              I agree to the terms and conditions
-            </label>
-          </div>
-          
           <button
             type="submit"
             disabled={isSubmitting}

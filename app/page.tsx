@@ -515,8 +515,6 @@ function FormModal({
   onLocationFocus: () => void;
   onLocationBlur: () => void;
 }) {
-  if (!isOpen) return null;
-
   const [isSubmitPressed, setIsSubmitPressed] = useState(false);
   const pressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
@@ -555,6 +553,8 @@ function FormModal({
       setIsSubmitPressed(false);
     }, 700);
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -632,18 +632,6 @@ function FormModal({
             )}
           </div>
           
-          <div className="flex items-start">
-            <input
-              type="checkbox"
-              id="terms"
-              required
-              className="mt-1 mr-2"
-            />
-            <label htmlFor="terms" className="text-sm text-gray-700">
-              I agree to the terms and conditions
-            </label>
-          </div>
-          
           <button
             type="submit"
             disabled={isSubmitting}
@@ -713,10 +701,6 @@ export function Home({ source }: { source?: string }) {
   const transitionSectionRef = useRef<HTMLElement>(null);
   const gallerySectionRef = useRef<HTMLElement>(null);
   const [galleryVisible, setGalleryVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth <= 768;
-  });
 
   const updateLocationSuggestions = useCallback((query: string) => {
     const trimmed = query.trim().toLowerCase();
@@ -769,16 +753,6 @@ export function Home({ source }: { source?: string }) {
     setIsSuccess(true);
     setIsModalOpen(false);
   }, [formData.email, realCount]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -1015,61 +989,6 @@ export function Home({ source }: { source?: string }) {
     </>
   );
 
-  // Success Page
-  if (isSuccess) {
-    const inviteProgress = Math.min(100, (invitedCount / REFERRAL_TARGET) * 100);
-    const invitesRemaining = Math.max(0, REFERRAL_TARGET - invitedCount);
-    const fallbackLink =
-      referralLink ||
-      (typeof window !== 'undefined'
-        ? `${(window.location.origin.includes('localhost') ? window.location.origin : REFERRAL_BASE_URL)}?ref=${encodeReferralCode(formData.email.trim().toLowerCase())}`
-        : `${REFERRAL_BASE_URL}?ref=${encodeReferralCode(formData.email.trim().toLowerCase())}`);
-    return (
-      <main className="min-h-screen flex items-center justify-center bg-black px-4">
-        <InstagramFloat />
-        <div className="max-w-xl w-full text-center text-white rounded-3xl border border-white/20 px-8 py-12 shadow-[0_20px_70px_rgba(0,0,0,0.35)] animate-fade-in space-y-8">
-          <p className="text-sm uppercase tracking-[0.3em] text-gray-400">
-            Welcome to TheNetwork
-          </p>
-          <h1 className="text-4xl sm:text-5xl font-bold font-brand">
-            You're #{(userRank ?? realCount).toLocaleString()} / 10,000 on the waitlist.
-          </h1>
-          <p className="text-lg text-gray-200">
-            Invite 3 friends → skip the line.
-          </p>
-          <button
-            type="button"
-            onClick={(event) => copyToClipboard(fallbackLink, event)}
-            className="inline-flex items-center justify-center w-full max-w-sm mx-auto gap-2 rounded-2xl bg-white text-black font-semibold py-4 px-6 hover:bg-gray-100 transition-colors"
-          >
-            Copy invite link
-          </button>
-          <div className="w-full max-w-sm mx-auto text-left text-white/90 space-y-3">
-            <div className="flex items-center justify-between text-xs uppercase tracking-wider text-gray-400">
-              <span className="transition-opacity duration-500 ease-out">You've invited</span>
-              <span
-                className={`font-semibold text-white transition-colors duration-500 ease-out ${invitePulse ? 'text-pink-200' : ''}`}
-              >
-                {invitedCount} / {REFERRAL_TARGET} friends
-              </span>
-            </div>
-            <div className="h-3 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className={`h-full rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 transition-all duration-500 ease-out ${invitePulse ? 'animate-pulse' : ''}`}
-                style={{ width: `${inviteProgress}%` }}
-              />
-            </div>
-            <p className="text-sm text-gray-300 transition-opacity duration-500 ease-out">
-              {invitedCount >= REFERRAL_TARGET
-                ? "Nice! You're ready to skip the line."
-                : `Invite ${invitesRemaining} more friend${invitesRemaining === 1 ? '' : 's'} to skip the line.`}
-            </p>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
   // Checkerboard transition scroll handler
   useEffect(() => {
     const handleScroll = () => {
@@ -1194,9 +1113,9 @@ export function Home({ source }: { source?: string }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Gallery section visibility observer and scroll handler
+  // Gallery section visibility observer and scroll handler (desktop only)
   useEffect(() => {
-    if (isMobile) return;
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -1206,14 +1125,13 @@ export function Home({ source }: { source?: string }) {
           }
         });
       },
-      { threshold: 0.3 } // Trigger when 30% of the section is visible
+      { threshold: 0.3 }
     );
 
     if (gallerySectionRef.current) {
       observer.observe(gallerySectionRef.current);
     }
 
-    // Scroll handler for horizontal scrolling and background transitions
     const handleGalleryScroll = () => {
       const section = gallerySectionRef.current;
       if (!section) return;
@@ -1221,28 +1139,20 @@ export function Home({ source }: { source?: string }) {
       const rect = section.getBoundingClientRect();
       const sectionHeight = section.offsetHeight;
       const windowHeight = window.innerHeight;
-      
-      // Calculate scroll progress through the section (0 to 1)
-      // Only start when section reaches top of viewport
       const scrollProgress = Math.max(0, Math.min(1, -rect.top / (sectionHeight - windowHeight)));
 
-      // Find the scroll containers
       const scrollContainer = section.querySelector('.gallery-scroll-container') as HTMLElement;
       const textContainer = section.querySelector('.gallery-text-container') as HTMLElement;
 
       if (scrollContainer && textContainer) {
-        // Delay horizontal scrolling until 30% through the section
-        // This ensures "THIS COULD BE YOU!" is fully visible before scrolling starts
         if (scrollProgress < 0.3) {
-          // Keep everything locked in place
           scrollContainer.style.transform = 'translateX(0)';
           textContainer.style.transform = 'translateX(0)';
         } else {
-          // Start horizontal scrolling after delay
-          const adjustedProgress = (scrollProgress - 0.3) / 0.7; // Normalize to 0-1 after delay
+          const adjustedProgress = (scrollProgress - 0.3) / 0.7;
           const maxScroll = scrollContainer.scrollWidth - window.innerWidth;
-          const horizontalOffset = adjustedProgress * maxScroll * 1.3; // Adjusted for 2 text repetitions
-          
+          const horizontalOffset = adjustedProgress * maxScroll * 1.3;
+
           scrollContainer.style.transform = `translateX(-${horizontalOffset}px)`;
           textContainer.style.transform = `translateX(-${horizontalOffset}px)`;
         }
@@ -1250,7 +1160,7 @@ export function Home({ source }: { source?: string }) {
     };
 
     window.addEventListener('scroll', handleGalleryScroll);
-    handleGalleryScroll(); // Initial check
+    handleGalleryScroll();
 
     return () => {
       if (gallerySectionRef.current) {
@@ -1258,7 +1168,63 @@ export function Home({ source }: { source?: string }) {
       }
       window.removeEventListener('scroll', handleGalleryScroll);
     };
-  }, [galleryVisible, isMobile]);
+  }, [galleryVisible]);
+
+  // Success Page
+  if (isSuccess) {
+    const inviteProgress = Math.min(100, (invitedCount / REFERRAL_TARGET) * 100);
+    const invitesRemaining = Math.max(0, REFERRAL_TARGET - invitedCount);
+    const fallbackLink =
+      referralLink ||
+      (typeof window !== 'undefined'
+        ? `${(window.location.origin.includes('localhost') ? window.location.origin : REFERRAL_BASE_URL)}?ref=${encodeReferralCode(formData.email.trim().toLowerCase())}`
+        : `${REFERRAL_BASE_URL}?ref=${encodeReferralCode(formData.email.trim().toLowerCase())}`);
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-black px-4">
+        <InstagramFloat />
+        <div className="max-w-xl w-full text-center text-white rounded-3xl border border-white/20 px-8 py-12 shadow-[0_20px_70px_rgba(0,0,0,0.35)] animate-fade-in space-y-8">
+          <p className="text-sm uppercase tracking-[0.3em] text-gray-400">
+            Welcome to TheNetwork
+          </p>
+          <h1 className="text-4xl sm:text-5xl font-bold font-brand">
+            You're #{(userRank ?? realCount).toLocaleString()} / 10,000 on the waitlist.
+          </h1>
+          <p className="text-lg text-gray-200">
+            Invite 3 friends → skip the line.
+          </p>
+          <button
+            type="button"
+            onClick={(event) => copyToClipboard(fallbackLink, event)}
+            className="inline-flex items-center justify-center w-full max-w-sm mx-auto gap-2 rounded-2xl bg-white text-black font-semibold py-4 px-6 hover:bg-gray-100 transition-colors"
+          >
+            Copy invite link
+          </button>
+          <div className="w-full max-w-sm mx-auto text-left text-white/90 space-y-3">
+            <div className="flex items-center justify-between text-xs uppercase tracking-wider text-gray-400">
+              <span className="transition-opacity duration-500 ease-out">You've invited</span>
+              <span
+                className={`font-semibold text-white transition-colors duration-500 ease-out ${invitePulse ? 'text-pink-200' : ''}`}
+              >
+                {invitedCount} / {REFERRAL_TARGET} friends
+              </span>
+            </div>
+            <div className="h-3 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className={`h-full rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 transition-all duration-500 ease-out ${invitePulse ? 'animate-pulse' : ''}`}
+                style={{ width: `${inviteProgress}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-300 transition-opacity duration-500 ease-out">
+              {invitedCount >= REFERRAL_TARGET
+                ? "Nice! You're ready to skip the line."
+                : `Invite ${invitesRemaining} more friend${invitesRemaining === 1 ? '' : 's'} to skip the line.`}
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
 
   return (
     <main style={{ backgroundColor: '#FFFFFF', paddingBottom: '80px' }}>
@@ -1423,8 +1389,7 @@ export function Home({ source }: { source?: string }) {
       </section>
 
       {/* Combined Section - Text, Images, and Horizontal Scroll Transition */}
-      {!isMobile ? (
-        <section ref={gallerySectionRef} className="relative bg-white overflow-hidden" style={{ minHeight: '200vh' }}>
+      <section ref={gallerySectionRef} className="relative bg-white overflow-hidden hidden md:block" style={{ minHeight: '200vh' }}>
           <div className="sticky top-0 min-h-screen flex flex-col justify-between py-12 px-6 md:px-12 overflow-hidden" style={{ paddingTop: '80px', paddingBottom: '30px' }}>
             {/* Top Heading Text - Always visible */}
             <div className="w-full mb-6">
@@ -1464,95 +1429,85 @@ export function Home({ source }: { source?: string }) {
             </div>
           </div>
         </section>
-      ) : (
-        <section ref={gallerySectionRef} className="bg-white px-6 py-10 space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-black leading-tight">
-              We turn your digital DNA into a personalized feed of people, moments, and opportunities that feel unnervingly right.
-            </h2>
-          </div>
-          <div className="overflow-x-auto flex gap-4 snap-x snap-mandatory pb-2">
-            {COMMUNITY_IMAGES.map((src) => (
-              <div 
-                key={`mobile-${src}`} 
-                className="rounded-3xl overflow-hidden snap-start min-w-[260px]"
-              >
-                <img src={src} alt="Community moment" className="w-full h-full object-cover" />
-              </div>
-            ))}
-          </div>
-          <h2 className="text-4xl font-bold text-black">THIS COULD BE YOU!</h2>
-        </section>
-      )}
+      <section className="bg-white px-6 py-10 space-y-8 md:hidden">
+        <div className="space-y-4">
+          <h2 className="text-3xl font-bold text-black leading-tight">
+            We turn your digital DNA into a personalized feed of people, moments, and opportunities that feel unnervingly right.
+          </h2>
+          <p className="text-base text-black leading-relaxed">
+            Swipe through what our community is living right now.
+          </p>
+        </div>
+        <div className="overflow-x-auto flex gap-4 snap-x snap-mandatory pb-2">
+          {COMMUNITY_IMAGES.map((src) => (
+            <div 
+              key={`mobile-${src}`} 
+              className="rounded-3xl overflow-hidden snap-start min-w-[260px]"
+            >
+              <img src={src} alt="Community moment" className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+        <h2 className="text-4xl font-bold text-black">THIS COULD BE YOU!</h2>
+      </section>
 
       {/* Signal Intelligence Section */}
-      {!isMobile ? (
-        <section 
-          id="signal-intelligence"
-          className="relative bg-white overflow-hidden flex items-start"
-          style={{ 
-            minHeight: '120vh',
-            zIndex: 10,
-            marginTop: '-30vh',
+      <section 
+        id="signal-intelligence"
+        className="relative bg-white overflow-hidden flex items-start hidden md:flex"
+        style={{ 
+          minHeight: '120vh',
+          zIndex: 10,
+          marginTop: '-30vh',
+        }}
+      >
+        <div 
+          className="sticky top-0 bg-white z-20 flex items-start w-full"
+          style={{
+            minHeight: '100vh',
+            paddingTop: '90px',
+            paddingBottom: '10px',
+            paddingLeft: '38px',
+            paddingRight: '38px',
           }}
         >
-          <div 
-            className="sticky top-0 bg-white z-20 flex items-start w-full"
-            style={{
-              minHeight: '100vh',
-              paddingTop: '90px',
-              paddingBottom: '10px',
-              paddingLeft: '38px',
-              paddingRight: '38px',
-            }}
-          >
-            {/* Content */}
-            <div style={{ width: '100%' }}>
-              <h2
-                className="font-bold text-black mb-24 leading-none md:whitespace-nowrap"
-                style={{
-                  // Scale with viewport so it stays one line across the top (desktop/tablet),
-                  // while still readable on smaller screens.
-                  fontSize: 'clamp(1.5rem, 5vw, 9rem)',
-                }}
-              >
-                {signalHeading}
-              </h2>
-              
-              <div className="max-w-2xl mb-8 space-y-6">
-                <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-                  Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
-                </p>
-                <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
-                  This enables accurate discovery today — and lays the foundation for what comes next.
-                </p>
-              </div>
-              
-              {/* <button className="px-8 py-3 bg-black text-white rounded-full text-lg font-bold hover:bg-gray-800 transition-colors">
-                Learn more
-              </button> */}
-            </div>
-          </div>
-        </section>
-      ) : (
-        <section 
-          id="signal-intelligence"
-          className="bg-white px-6 py-12 space-y-8"
-          style={{ marginTop: '0' }}
-        >
-          <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-black leading-tight">
+          <div style={{ width: '100%' }}>
+            <h2
+              className="font-bold text-black mb-24 leading-none md:whitespace-nowrap"
+              style={{
+                fontSize: 'clamp(1.5rem, 5vw, 9rem)',
+              }}
+            >
               {signalHeading}
             </h2>
-            <p className="text-lg text-black leading-relaxed">
-              Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
-            </p>
-            <p className="text-lg text-black leading-relaxed">
-              This enables accurate discovery today — and lays the foundation for what comes next.
-            </p>
+            
+            <div className="max-w-2xl mb-8 space-y-6">
+              <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
+                Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
+              </p>
+              <p className="text-xl md:text-2xl text-black leading-relaxed font-medium">
+                This enables accurate discovery today — and lays the foundation for what comes next.
+              </p>
+            </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
+      <section 
+        className="bg-white px-6 py-12 space-y-8 md:hidden"
+        style={{ marginTop: '0' }}
+      >
+        <div className="space-y-4">
+          <h2 className="text-3xl font-bold text-black leading-tight">
+            {signalHeading}
+          </h2>
+          <p className="text-lg text-black leading-relaxed">
+            Signal intelligence is defining the next generation of consumer platforms, and TheNetwork is developing the infrastructure to capture, structure, and route meaning from your digital life.
+          </p>
+          <p className="text-lg text-black leading-relaxed">
+            This enables accurate discovery today — and lays the foundation for what comes next.
+          </p>
+        </div>
+      </section>
 
       {/* Join Us Section */}
       <section
